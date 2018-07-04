@@ -2308,6 +2308,27 @@ public final class PropertyKey implements Comparable<PropertyKey> {
           .setConsistencyCheckLevel(ConsistencyCheckLevel.WARN)
           .setScope(Scope.CLIENT)
           .build();
+
+  public static final PropertyKey USER_FILE_IN_STREAM_VERSION =
+          new Builder(Name.USER_FILE_IN_STREAM_VERSION)
+                  .setDefaultValue(1)
+                  .setDescription("the version of input stream")
+                  .build();
+  public static final PropertyKey USER_FILE_LOCAL_RETRY_TIME =
+          new Builder(Name.USER_FILE_LOCAL_RETRY_TIME)
+                  .setDefaultValue(2)
+                  .setDescription("the retry time of localizing the target file")
+                  .build();
+  public static final PropertyKey USER_FILE_LOCAL_RETRY_SLEEP_STEP =
+          new Builder(Name.USER_FILE_LOCAL_RETRY_SLEEP_STEP)
+                  .setDefaultValue(2000)
+                  .setDescription("the retry time of localizing the target file")
+                  .build();
+  public static final PropertyKey USER_LOCAL_FILE_IN_STREAM_TMP_PATH =
+          new Builder(Name.USER_LOCAL_FILE_IN_STREAM_TMP_PATH)
+                  .setDefaultValue("/tmp/alluxio/data")
+                  .setDescription("it is for the input stream of version 1024")
+                  .build();
   /**
    * @deprecated It will be removed in 2.0.0.
    */
@@ -3432,6 +3453,14 @@ public final class PropertyKey implements Comparable<PropertyKey> {
     public static final String USER_FAILED_SPACE_REQUEST_LIMITS =
         "alluxio.user.failed.space.request.limits";
     public static final String USER_FILE_BUFFER_BYTES = "alluxio.user.file.buffer.bytes";
+    public static final String USER_FILE_IN_STREAM_VERSION =
+            "alluxio.user.local.fileinstream.version";
+    public static final String USER_FILE_LOCAL_RETRY_TIME =
+            "alluxio.user.local.retry.time";
+    public static final String USER_LOCAL_FILE_IN_STREAM_TMP_PATH =
+            "alluxio.user.local.fileinstream.tmp.path";
+    public static final String USER_FILE_LOCAL_RETRY_SLEEP_STEP =
+            "alluxio.user.local.retry.sleep.step";
     public static final String USER_FILE_CACHE_PARTIALLY_READ_BLOCK =
         "alluxio.user.file.cache.partially.read.block";
     public static final String USER_FILE_COPY_FROM_LOCAL_WRITE_LOCATION_POLICY =

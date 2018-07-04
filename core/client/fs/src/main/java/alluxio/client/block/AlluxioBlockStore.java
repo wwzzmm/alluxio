@@ -19,6 +19,7 @@ import alluxio.client.block.policy.BlockLocationPolicy;
 import alluxio.client.block.policy.options.GetWorkerOptions;
 import alluxio.client.block.stream.BlockInStream;
 import alluxio.client.block.stream.BlockInStream.BlockInStreamSource;
+import alluxio.client.block.stream.BlockInStreamV2;
 import alluxio.client.block.stream.BlockOutStream;
 import alluxio.client.file.FileSystemContext;
 import alluxio.client.file.options.InStreamOptions;
@@ -212,7 +213,13 @@ public final class AlluxioBlockStore {
     if (dataSource == null) {
       throw new UnavailableException(ExceptionMessage.NO_WORKER_AVAILABLE.getMessage());
     }
-    return BlockInStream.create(mContext, info, dataSource, dataSourceType, options);
+//    return BlockInStream.create(mContext, info, dataSource, dataSourceType, options);
+    if (options.getOptions().getVersion() == 2) {
+      return BlockInStreamV2.create(mContext, info, dataSource, options);
+    } else {
+      return BlockInStream.create(mContext, info, dataSource, dataSourceType, options);
+
+    }
   }
 
   private Set<WorkerNetAddress> handleFailedWorkers(Set<WorkerNetAddress> workers,

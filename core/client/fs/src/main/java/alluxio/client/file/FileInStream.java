@@ -66,7 +66,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 @PublicApi
 @NotThreadSafe
 public class FileInStream extends InputStream implements BoundedStream, PositionedReadable,
-    Seekable {
+    Seekable, Input {
   private static final Logger LOG = LoggerFactory.getLogger(FileInStream.class);
   private static final int MAX_WORKERS_TO_RETRY =
       Configuration.getInt(PropertyKey.USER_BLOCK_WORKER_CLIENT_READ_RETRY);
@@ -185,8 +185,102 @@ public class FileInStream extends InputStream implements BoundedStream, Position
   }
 
   @Override
-  public void close() throws IOException {
-    closeBlockInStream(mBlockInStream);
+  public int readByte() throws IOException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public boolean readBool() throws IOException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public int readShort() throws IOException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public int readInt() throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public float readFloat() throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public long readLong() throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public double readDouble() throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public String readString() throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+///////////////
+
+
+  @Override
+  public int readByte(int pos) throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public boolean readBool(int pos) throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public int readShort(int pos) throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public int readInt(int pos) throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public float readFloat(int pos) throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public long readLong(int pos) throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public double readDouble(int pos) throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public String readString(int pos) throws IOException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void readBytes(byte[] bytes, int pos) throws IOException {
+    throw new UnsupportedOperationException();
   }
 
   /* Bounded Stream methods */

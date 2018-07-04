@@ -372,4 +372,202 @@ public final class BufferUtils {
   }
 
   private BufferUtils() {} // prevent instantiation
+
+  /**
+   * Gets an increasing sequence of bytes starting with the given value.
+   *
+   * @param start the starting value to use
+   * @param len the target length of the sequence
+   * @return an increasing sequence of bytes
+   */
+  public static byte[] getIncreasingFloatByteArray(int start, int len) {
+    ByteBuffer buffer = ByteBuffer.allocate(len * 4);
+    for (int k = 0; k < len; k++) {
+      buffer.putFloat(k + start);
+    }
+    return buffer.array();
+  }
+  /**
+   * Gets an increasing sequence of bytes starting with the given value.
+   *
+   * @param start the starting value to use
+   * @param len the target length of the sequence
+   * @return an increasing sequence of bytes
+   */
+  public static float[] getIncreasingFloatArray(int start, int len) {
+    float[] ret = new float[len];
+    for (int k = 0; k < len; k++) {
+      ret[k] = (k + start);
+    }
+    return ret;
+  }
+  /**
+   * Gets an increasing sequence of bytes starting with the given value.
+   *
+   * @param start the starting value to use
+   * @param len the target length of the sequence
+   * @return an increasing sequence of bytes
+   */
+  public static boolean[] getIncreasingBoolArray(int start, int len) {
+    boolean[] ret = new boolean[len];
+    for (int k = 0; k < len; k++) {
+      ret[k] = Math.abs((k + start) % 2) == 1;
+    }
+    return ret;
+  }
+
+  public static byte[] getIncreasingBoolByteArray(int start, int len) {
+    byte[] ret = new byte[len];
+    for (int k = 0; k < len; k++) {
+      ret[k] = (byte) ((k + start) % 2);
+    }
+    return ret;
+  }
+
+  /**
+   * Gets an increasing sequence of bytes starting with the given value.
+   *
+   * @param start the starting value to use
+   * @param len the target length of the sequence
+   * @return an increasing sequence of bytes
+   */
+  public static byte[] getIncreasingDoubleByteArray(int start, int len) {
+    ByteBuffer buffer = ByteBuffer.allocate(len * 8);
+    for (int k = 0; k < len; k++) {
+      buffer.putDouble((k + start));
+    }
+    return buffer.array();
+  }
+  /**
+   * Gets an increasing sequence of bytes starting with the given value.
+   *
+   * @param start the starting value to use
+   * @param len the target length of the sequence
+   * @return an increasing sequence of bytes
+   */
+  public static double[] getIncreasingDoubleArray(int start, int len) {
+    double[] ret = new double[len];
+    for (int k = 0; k < len; k++) {
+      ret[k] = (double) (k + start);
+    }
+    return ret;
+  }
+
+  /**
+   * Gets an increasing sequence of bytes starting with the given value.
+   *
+   * @param start the starting value to use
+   * @param len the target length of the sequence
+   * @return an increasing sequence of bytes
+   */
+  public static byte[] getIncreasingLongByteArray(int start, int len) {
+    ByteBuffer buffer = ByteBuffer.allocate(len * 8);
+    for (int k = 0; k < len; k++) {
+      buffer.putLong(k + start);
+    }
+    return buffer.array();
+  }
+  /**
+   * Gets an increasing sequence of bytes starting with the given value.
+   *
+   * @param start the starting value to use
+   * @param len the target length of the sequence
+   * @return an increasing sequence of bytes
+   */
+  public static long[] getIncreasingLongArray(int start, int len) {
+    long[] ret = new long[len];
+    for (int k = 0; k < len; k++) {
+      ret[k] = (k + start);
+    }
+    return ret;
+  }
+  /**
+   * Gets an increasing sequence of bytes starting with the given value.
+   *
+   * @param start the starting value to use
+   * @param len the target length of the sequence
+   * @return an increasing sequence of bytes
+   */
+  public static byte[] getIncreasingShortByteArray(int start, int len) {
+    ByteBuffer buffer = ByteBuffer.allocate(len * 2);
+    for (int k = 0; k < len; k++) {
+      buffer.putShort((short) (k + start));
+    }
+    return buffer.array();
+  }
+  /**
+   * Gets an increasing sequence of bytes starting with the given value.
+   *
+   * @param start the starting value to use
+   * @param len the target length of the sequence
+   * @return an increasing sequence of bytes
+   */
+  public static short[] getIncreasingShortArray(int start, int len) {
+    short[] ret = new short[len];
+    for (int k = 0; k < len; k++) {
+      ret[k] = (short) (k + start);
+    }
+    return ret;
+  }
+  /**
+   * Gets an increasing sequence of bytes starting with the given value.
+   *
+   * @param start the starting value to use
+   * @param len the target length of the sequence
+   * @return an increasing sequence of bytes
+   */
+  public static byte[] getIncreasingIntByteArray(int start, int len) {
+    ByteBuffer buffer = ByteBuffer.allocate(len * 4);
+    for (int k = 0; k < len; k++) {
+      buffer.putInt(k + start);
+    }
+    return buffer.array();
+  }
+
+  /**
+   * Gets an increasing sequence of bytes starting with the given value.
+   *
+   * @param start the starting value to use
+   * @param len the target length of the sequence
+   * @return an increasing sequence of bytes
+   */
+  public static int[] getIncreasingIntArray(int start, int len) {
+    int[] ret = new int[len];
+    for (int k = 0; k < len; k++) {
+      ret[k] = (k + start);
+    }
+    return ret;
+  }
+
+  /**
+   * Gets an increasing sequence of bytes starting with the given value.
+   *
+   * @param start the starting value to use
+   * @param len the target length of the sequence
+   * @return an increasing sequence of bytes
+   */
+  public static byte[] getIncreasingStringByteArray(int start, int len) {
+    ByteBuffer buffer = ByteBuffer.allocate(len * 4 + (len - 1) * len / 2);
+    for (int k = 0; k < len; k++) {
+      buffer.putInt(k + start);
+      StringBuffer sb = new StringBuffer();
+      for (int i = 0; i < k; i++) {
+        if (i % 4 == 0) {
+          sb.append('a');
+        }
+        if (i % 4 == 1) {
+          sb.append('b');
+        }
+        if (i % 4 == 2) {
+          sb.append('c');
+        }
+        if (i % 4 == 3) {
+          sb.append('d');
+        }
+      }
+      buffer.put(sb.toString().getBytes());
+    }
+    return buffer.array();
+  }
+
 }

@@ -41,6 +41,7 @@ public final class OpenFileOptions {
   private int mMaxUfsReadConcurrency;
   /** The location policy to determine the worker location to serve UFS block reads. */
   private BlockLocationPolicy mUfsReadLocationPolicy;
+  private int mVersion = Configuration.getInt(PropertyKey.USER_FILE_IN_STREAM_VERSION);
 
   /**
    * @return the default {@link InStreamOptions}
@@ -236,6 +237,8 @@ public final class OpenFileOptions {
     return new InStreamOptions(status, this);
   }
 
+
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -265,5 +268,14 @@ public final class OpenFileOptions {
         .add("readType", mReadType)
         .add("ufsReadLocationPolicy", mUfsReadLocationPolicy)
         .toString();
+  }
+
+  public int getVersion() {
+    return mVersion;
+  }
+
+  public OpenFileOptions setVersion(int version) {
+    this.mVersion = version;
+    return this;
   }
 }

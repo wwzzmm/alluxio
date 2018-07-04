@@ -12,11 +12,14 @@
 package alluxio.client.fs;
 
 import alluxio.AlluxioURI;
+import alluxio.Configuration;
 import alluxio.Constants;
 import alluxio.PropertyKey;
 import alluxio.client.ReadType;
 import alluxio.client.WriteType;
+import alluxio.client.file.BaseFileSystem;
 import alluxio.client.file.FileInStream;
+import alluxio.client.file.FileInStreamV2;
 import alluxio.client.file.FileOutStream;
 import alluxio.client.file.FileSystem;
 import alluxio.client.file.FileSystemTestUtils;
@@ -30,7 +33,6 @@ import alluxio.util.CommonUtils;
 import alluxio.util.io.BufferUtils;
 import alluxio.util.io.PathUtils;
 import alluxio.wire.FileBlockInfo;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -45,31 +47,35 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 /**
- * Integration tests for {@link alluxio.client.file.FileInStream}.
+ * Integration tests for {@link FileInStream}.
  */
-public final class FileInStreamIntegrationTest extends BaseIntegrationTest {
+public final class FileInStreamIntegrationV2Test extends BaseIntegrationTest {
   // The block size needs to be sufficiently large based on TCP send/receive buffers, set to 1MB.
-  private static final int BLOCK_SIZE = Constants.MB;
-  private static final int MIN_LEN = BLOCK_SIZE + 1;
-  private static final int MAX_LEN = BLOCK_SIZE * 4 + 1;
-  private static final int DELTA = BLOCK_SIZE / 2;
+  private static final int BASE_SIZE = 30;
+  private static final int BLOCK_SIZE = BASE_SIZE * 5;
+  private static final int MIN_LEN = BASE_SIZE + 1;
+  private static final int MAX_LEN = BASE_SIZE * 4 + 1;
+  private static final int DELTA = BASE_SIZE / 2;
 
   @Rule
   public LocalAlluxioClusterResource mLocalAlluxioClusterResource =
       new LocalAlluxioClusterResource.Builder().setProperty(
           PropertyKey.USER_BLOCK_SIZE_BYTES_DEFAULT, BLOCK_SIZE).build();
+  @Rule
+  public Timeout mGlobalTimeout = Timeout.seconds(60000);
+  @Rule
+  public ExpectedException mThrown = ExpectedException.none();
   private FileSystem mFileSystem;
   private CreateFileOptions mWriteBoth;
   private CreateFileOptions mWriteAlluxio;
   private CreateFileOptions mWriteUnderStore;
   private String mTestPath;
-
-  @Rule
-  public Timeout mGlobalTimeout = Timeout.seconds(60);
-
-  @Rule
-  public ExpectedException mThrown = ExpectedException.none();
 
   @Before
   public void before() throws Exception {
@@ -87,7 +93,8 @@ public final class FileInStreamIntegrationTest extends BaseIntegrationTest {
 
     // Create files of varying size and write type to later read from
     for (int k = MIN_LEN; k <= MAX_LEN; k += DELTA) {
-      for (CreateFileOptions op : getOptionSet()) {
+      for (int i = 0; i < getOptionSet4Writer().size(); i++) {
+        CreateFileOptions op = getOptionSet4Writer().get(i);
         AlluxioURI path = new AlluxioURI(mTestPath + "/file_" + k + "_" + op.hashCode());
         FileSystemTestUtils.createByteFile(mFileSystem, path, op, k);
       }
@@ -96,8 +103,16 @@ public final class FileInStreamIntegrationTest extends BaseIntegrationTest {
 
   private List<CreateFileOptions> getOptionSet() {
     List<CreateFileOptions> ret = new ArrayList<>(3);
-//    ret.add(mWriteBoth);
-//    ret.add(mWriteAlluxio);
+    ret.add(mWriteBoth);
+    ret.add(mWriteAlluxio);
+//    ret.add(mWriteUnderStore);
+    return ret;
+  }
+
+  private List<CreateFileOptions> getOptionSet4Writer() {
+    List<CreateFileOptions> ret = new ArrayList<>(3);
+    ret.add(mWriteBoth);
+    ret.add(mWriteAlluxio);
     ret.add(mWriteUnderStore);
     return ret;
   }
@@ -110,11 +125,14 @@ public final class FileInStreamIntegrationTest extends BaseIntegrationTest {
       confParams = {PropertyKey.Name.USER_NETWORK_NETTY_READER_PACKET_SIZE_BYTES, "64KB"})
   public void readTest1() throws Exception {
     for (int k = MIN_LEN; k <= MAX_LEN; k += DELTA) {
-      for (CreateFileOptions op : getOptionSet()) {
+      for (int i = 0; i < getOptionSet().size(); i++) {
+        CreateFileOptions op = getOptionSet().get(i);
+
         String filename = mTestPath + "/file_" + k + "_" + op.hashCode();
         AlluxioURI uri = new AlluxioURI(filename);
 
-        FileInStream is = mFileSystem.openFile(uri, FileSystemTestUtils.toOpenFileOptions(op));
+        FileInStream is = mFileSystem
+            .openFile(uri, getOptions(op));
         byte[] ret = new byte[k];
         int value = is.read();
         int cnt = 0;
@@ -128,7 +146,7 @@ public final class FileInStreamIntegrationTest extends BaseIntegrationTest {
         Assert.assertTrue(BufferUtils.equalIncreasingByteArray(k, ret));
         is.close();
 
-        is = mFileSystem.openFile(uri, FileSystemTestUtils.toOpenFileOptions(op));
+        is = mFileSystem.openFile(uri, getOptions(op));
         ret = new byte[k];
         value = is.read();
         cnt = 0;
@@ -145,6 +163,10 @@ public final class FileInStreamIntegrationTest extends BaseIntegrationTest {
     }
   }
 
+  private OpenFileOptions getOptions(CreateFileOptions op) {
+    return FileSystemTestUtils.toOpenFileOptions(op).setVersion(2);
+  }
+
   /**
    * Tests {@link FileInStream#read(byte[])}.
    */
@@ -157,13 +179,13 @@ public final class FileInStreamIntegrationTest extends BaseIntegrationTest {
         String filename = mTestPath + "/file_" + k + "_" + op.hashCode();
         AlluxioURI uri = new AlluxioURI(filename);
 
-        FileInStream is = mFileSystem.openFile(uri, FileSystemTestUtils.toOpenFileOptions(op));
+        FileInStream is = mFileSystem.openFile(uri, getOptions(op));
         byte[] ret = new byte[k];
         Assert.assertEquals(k, is.read(ret));
         Assert.assertTrue(BufferUtils.equalIncreasingByteArray(k, ret));
         is.close();
 
-        is = mFileSystem.openFile(uri, FileSystemTestUtils.toOpenFileOptions(op));
+        is = mFileSystem.openFile(uri, getOptions(op));
         ret = new byte[k];
         Assert.assertEquals(k, is.read(ret));
         Assert.assertTrue(BufferUtils.equalIncreasingByteArray(k, ret));
@@ -184,13 +206,13 @@ public final class FileInStreamIntegrationTest extends BaseIntegrationTest {
         String filename = mTestPath + "/file_" + k + "_" + op.hashCode();
         AlluxioURI uri = new AlluxioURI(filename);
 
-        FileInStream is = mFileSystem.openFile(uri, FileSystemTestUtils.toOpenFileOptions(op));
+        FileInStream is = mFileSystem.openFile(uri, getOptions(op));
         byte[] ret = new byte[k / 2];
         Assert.assertEquals(k / 2, is.read(ret, 0, k / 2));
         Assert.assertTrue(BufferUtils.equalIncreasingByteArray(k / 2, ret));
         is.close();
 
-        is = mFileSystem.openFile(uri, FileSystemTestUtils.toOpenFileOptions(op));
+        is = mFileSystem.openFile(uri, getOptions(op));
         ret = new byte[k];
         Assert.assertEquals(k, is.read(ret, 0, k));
         Assert.assertTrue(BufferUtils.equalIncreasingByteArray(k, ret));
@@ -210,7 +232,7 @@ public final class FileInStreamIntegrationTest extends BaseIntegrationTest {
         AlluxioURI uri = new AlluxioURI(filename);
 
         try (FileInStream is = mFileSystem
-            .openFile(uri, FileSystemTestUtils.toOpenFileOptions(op))) {
+            .openFile(uri, getOptions(op))) {
           byte[] ret = new byte[k / 2];
           int readBytes = is.read(ret, 0, k / 2);
           while (readBytes != -1) {
@@ -236,7 +258,7 @@ public final class FileInStreamIntegrationTest extends BaseIntegrationTest {
         AlluxioURI uri = new AlluxioURI(filename);
 
         try (FileInStream is = mFileSystem
-            .openFile(uri, FileSystemTestUtils.toOpenFileOptions(op))) {
+            .openFile(uri, getOptions(op))) {
           is.seek(-1);
         }
       }
@@ -256,7 +278,7 @@ public final class FileInStreamIntegrationTest extends BaseIntegrationTest {
         AlluxioURI uri = new AlluxioURI(filename);
 
         try (FileInStream is = mFileSystem
-            .openFile(uri, FileSystemTestUtils.toOpenFileOptions(op))) {
+            .openFile(uri, getOptions(op))) {
           is.seek(k + 1);
         }
       }
@@ -273,7 +295,7 @@ public final class FileInStreamIntegrationTest extends BaseIntegrationTest {
         String filename = mTestPath + "/file_" + k + "_" + op.hashCode();
         AlluxioURI uri = new AlluxioURI(filename);
 
-        FileInStream is = mFileSystem.openFile(uri, FileSystemTestUtils.toOpenFileOptions(op));
+        FileInStream is = mFileSystem.openFile(uri, getOptions(op));
         is.seek(k / 3);
         Assert.assertEquals(BufferUtils.intAsUnsignedByteValue(k / 3), is.read());
         is.seek(k / 2);
@@ -291,13 +313,13 @@ public final class FileInStreamIntegrationTest extends BaseIntegrationTest {
   @Test
   public void eofSeek() throws Exception {
     String uniqPath = PathUtils.uniqPath();
-    int length = BLOCK_SIZE * 3;
+    int length = BLOCK_SIZE * 1;
     for (CreateFileOptions op : getOptionSet()) {
       String filename = uniqPath + "/file_" + op.hashCode();
       AlluxioURI uri = new AlluxioURI(filename);
       FileSystemTestUtils.createByteFile(mFileSystem, filename, length, op);
 
-      FileInStream is = mFileSystem.openFile(uri, FileSystemTestUtils.toOpenFileOptions(op));
+      FileInStream is = mFileSystem.openFile(uri, getOptions(op));
       byte[] data = new byte[length];
       is.read(data, 0, length);
       Assert.assertTrue(BufferUtils.equalIncreasingByteArray(length, data));
@@ -318,7 +340,7 @@ public final class FileInStreamIntegrationTest extends BaseIntegrationTest {
         String filename = mTestPath + "/file_" + k + "_" + op.hashCode();
         AlluxioURI uri = new AlluxioURI(filename);
 
-        FileInStream is = mFileSystem.openFile(uri, FileSystemTestUtils.toOpenFileOptions(op));
+        FileInStream is = mFileSystem.openFile(uri, getOptions(op));
         Assert.assertEquals(k / 2, is.skip(k / 2));
         Assert.assertEquals(BufferUtils.intAsUnsignedByteValue(k / 2), is.read());
         Assert.assertEquals(k / 3, is.skip(k / 3));
@@ -425,7 +447,7 @@ public final class FileInStreamIntegrationTest extends BaseIntegrationTest {
       String filename = mTestPath + "/file_" + MIN_LEN + "_" + op.hashCode();
       AlluxioURI uri = new AlluxioURI(filename);
 
-      FileInStream is = mFileSystem.openFile(uri, FileSystemTestUtils.toOpenFileOptions(op));
+      FileInStream is = mFileSystem.openFile(uri, getOptions(op));
       byte[] ret = new byte[DELTA - 1];
       Assert.assertEquals(DELTA - 1, is.positionedRead(MIN_LEN - DELTA + 1, ret, 0, DELTA));
       Assert.assertTrue(BufferUtils.equalIncreasingByteArray(MIN_LEN - DELTA + 1, DELTA - 1, ret));
@@ -474,109 +496,11 @@ public final class FileInStreamIntegrationTest extends BaseIntegrationTest {
         });
       } else {
         Thread.sleep(1000);
-        status = mFileSystem.getStatus(uri);
         Assert.assertEquals(0, status.getInAlluxioPercentage());
       }
     }
   }
 
-  @Test(timeout = 10000)
-  public void asyncCacheAfterSeek() throws Exception {
-    String filename = mTestPath + "/file_" + MAX_LEN + "_" + mWriteUnderStore.hashCode();
-    AlluxioURI uri = new AlluxioURI(filename);
-
-    for (ReadType readType : ReadType.values()) {
-      mFileSystem.free(uri);
-      CommonUtils.waitFor("No in-Alluxio data left from previous iteration.", (input) -> {
-        try {
-          URIStatus st = mFileSystem.getStatus(uri);
-          return st.getInAlluxioPercentage() == 0;
-        } catch (Exception e) {
-          return false;
-        }
-      });
-      FileInStream is = mFileSystem.openFile(uri, OpenFileOptions.defaults().setReadType(readType));
-      URIStatus status = mFileSystem.getStatus(uri);
-      is.seek(status.getBlockSizeBytes() + 1);
-      is.read();
-      status = mFileSystem.getStatus(uri);
-      Assert.assertEquals(0, status.getInAlluxioPercentage());
-      is.close();
-      if (readType.isCache()) {
-        CommonUtils.waitFor("Second block to be cached.", (input) -> {
-          try {
-            URIStatus st = mFileSystem.getStatus(uri);
-            boolean achieved = true;
-            // Expect only second block to be cached, other blocks should be empty in Alluxio
-            for (int i = 0; i < st.getFileBlockInfos().size(); i++) {
-              FileBlockInfo info = st.getFileBlockInfos().get(i);
-              if (i == 1) {
-                achieved = achieved && !info.getBlockInfo().getLocations().isEmpty();
-              } else {
-                achieved = achieved && info.getBlockInfo().getLocations().isEmpty();
-              }
-            }
-            return achieved;
-          } catch (Exception e) {
-            return false;
-          }
-        });
-      } else {
-        Thread.sleep(1000);
-        status = mFileSystem.getStatus(uri);
-        Assert.assertEquals(0, status.getInAlluxioPercentage());
-      }
-    }
-  }
-
-  @Test(timeout = 10000)
-  public void asyncCacheFirstBlockPRead() throws Exception {
-    String filename = mTestPath + "/file_" + MAX_LEN + "_" + mWriteUnderStore.hashCode();
-    AlluxioURI uri = new AlluxioURI(filename);
-
-    for (ReadType readType : ReadType.values()) {
-      mFileSystem.free(uri);
-      CommonUtils.waitFor("No in-Alluxio data left from previous iteration.", (input) -> {
-        try {
-          URIStatus st = mFileSystem.getStatus(uri);
-          return st.getInAlluxioPercentage() == 0;
-        } catch (Exception e) {
-          return false;
-        }
-      });
-      FileInStream is = mFileSystem.openFile(uri, OpenFileOptions.defaults().setReadType(readType));
-      // Positioned reads trigger async caching after reading and do not need to wait for a close
-      // or a block boundary to be crossed.
-      URIStatus status = mFileSystem.getStatus(uri);
-      Assert.assertEquals(0, status.getInAlluxioPercentage());
-      is.positionedRead(BLOCK_SIZE / 2, new byte[1], 0, 1);
-      if (readType.isCache()) {
-        CommonUtils.waitFor("First block to be cached.", (input) -> {
-          try {
-            URIStatus st = mFileSystem.getStatus(uri);
-            boolean achieved = true;
-            // Expect only first block to be cached, other blocks should be empty in Alluxio
-            for (int i = 0; i < st.getFileBlockInfos().size(); i++) {
-              FileBlockInfo info = st.getFileBlockInfos().get(i);
-              if (i == 0) {
-                achieved = achieved && !info.getBlockInfo().getLocations().isEmpty();
-              } else {
-                achieved = achieved && info.getBlockInfo().getLocations().isEmpty();
-              }
-            }
-            return achieved;
-          } catch (Exception e) {
-            return false;
-          }
-        });
-      } else {
-        Thread.sleep(1000);
-        status = mFileSystem.getStatus(uri);
-        Assert.assertEquals(0, status.getInAlluxioPercentage());
-      }
-      is.close();
-    }
-  }
 
   @Test
   public void syncCacheFirstBlock() throws Exception {
@@ -584,12 +508,83 @@ public final class FileInStreamIntegrationTest extends BaseIntegrationTest {
     AlluxioURI uri = new AlluxioURI(filename);
 
     FileInStream is =
-        mFileSystem.openFile(uri, OpenFileOptions.defaults().setReadType(ReadType.CACHE));
+        mFileSystem
+            .openFile(uri, OpenFileOptions.defaults().setReadType(ReadType.CACHE).setVersion(2));
     URIStatus status = mFileSystem.getStatus(uri);
     byte[] data = new byte[(int) status.getBlockSizeBytes() + 1];
     is.read(data);
     status = mFileSystem.getStatus(uri);
     Assert.assertFalse(status.getFileBlockInfos().get(0).getBlockInfo().getLocations().isEmpty());
     is.close();
+  }
+
+  @Test
+  public void forceLoadFile() throws Exception {
+    Configuration.set(PropertyKey.USER_FILE_IN_STREAM_VERSION, 2);
+
+    boolean flag4UFS = false;
+    boolean checked = false;
+    for (int k = MIN_LEN; k <= MAX_LEN; k += DELTA) {
+      for (CreateFileOptions op : getOptionSet4Writer()) {
+        String filename = mTestPath + "/file_" + k + "_" + op.hashCode();
+        AlluxioURI uri = new AlluxioURI(filename);
+        URIStatus status = mFileSystem.getStatus(uri);
+        if (!status.getFileBlockInfos().isEmpty()) {
+          FileBlockInfo info = status.getFileBlockInfos().get(0);
+          if (info.getBlockInfo().getLocations().isEmpty()) {
+            flag4UFS = true;
+            checked = true;
+          }
+        }
+        FileInStream is = mFileSystem.openFile(uri, FileSystemTestUtils.toOpenFileOptions(op));
+        Assert.assertTrue(is instanceof FileInStreamV2);
+
+        Assert.assertEquals(k / 2, is.skip(k / 2));
+        Assert.assertEquals(k / 2, is.read());
+        is.close();
+
+        is = mFileSystem.openFile(uri, FileSystemTestUtils.toOpenFileOptions(op));
+        Assert.assertEquals(k / 3, is.skip(k / 3));
+        Assert.assertEquals(k / 3, is.read());
+        is.close();
+        status = mFileSystem.getStatus(uri);
+
+        if (flag4UFS) {
+          Assert.assertFalse(
+              status.getFileBlockInfos().get(0).getBlockInfo().getLocations().isEmpty());
+        }
+        flag4UFS = false;
+      }
+    }
+    Assert.assertTrue(checked);
+  }
+
+  @Test
+  public void forceLoadFileRetry() throws Exception {
+    Configuration.set(PropertyKey.USER_FILE_IN_STREAM_VERSION, 2);
+    BaseFileSystem mFileSystem = mock(BaseFileSystem.class);
+
+    boolean checked = false;
+    for (int k = MIN_LEN; k <= MAX_LEN; k += DELTA) {
+      CreateFileOptions op = mWriteUnderStore;
+      String filename = mTestPath + "/file_" + k + "_" + op.hashCode();
+      AlluxioURI uri = new AlluxioURI(filename);
+      FileInStream is = mFileSystem.openFile(uri, FileSystemTestUtils.toOpenFileOptions(op));
+      Assert.assertTrue(is instanceof FileInStreamV2);
+//      when(mFileSystem.positionedRead(anyLong(), any(byte[].class), anyInt(), anyInt()))
+//          .thenThrow(new UnavailableException("test exception"));
+      Assert.assertEquals(k / 2, is.skip(k / 2));
+      Assert.assertEquals(k / 2, is.read());
+      is.close();
+
+      is = mFileSystem.openFile(uri, FileSystemTestUtils.toOpenFileOptions(op));
+      Assert.assertEquals(k / 3, is.skip(k / 3));
+      Assert.assertEquals(k / 3, is.read());
+      ((BaseFileSystem) verify(mFileSystem, times(1)))
+          .processLocalization(any(AlluxioURI.class), any(URIStatus.class));
+      is.close();
+
+    }
+    Assert.assertTrue(checked);
   }
 }
