@@ -2698,8 +2698,9 @@ public final class DefaultFileSystemMaster extends AbstractMaster implements Fil
     }
 
     // Metadata loaded from UFS has no TTL set.
+    // this property belong to client must be config in server.
     CreateFileOptions createFileOptions =
-        CreateFileOptions.defaults().setBlockSizeBytes(ufsBlockSizeByte)
+        CreateFileOptions.defaults().setBlockSizeBytes(Configuration.getBytes(PropertyKey.USER_BLOCK_SIZE_BYTES_DEFAULT))
             .setRecursive(options.isCreateAncestors()).setMetadataLoad(true).setPersisted(true);
     String ufsOwner = ufsStatus.getOwner();
     String ufsGroup = ufsStatus.getGroup();

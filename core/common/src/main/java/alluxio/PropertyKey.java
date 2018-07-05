@@ -2232,7 +2232,7 @@ public final class PropertyKey implements Comparable<PropertyKey> {
           .build();
   public static final PropertyKey USER_BLOCK_SIZE_BYTES_DEFAULT =
       new Builder(Name.USER_BLOCK_SIZE_BYTES_DEFAULT)
-          .setDefaultValue("512MB")
+          .setDefaultValue("5120MB")
           .setDescription("Default block size for Alluxio files.")
           .setConsistencyCheckLevel(ConsistencyCheckLevel.WARN)
           .setScope(Scope.CLIENT)
@@ -2329,6 +2329,20 @@ public final class PropertyKey implements Comparable<PropertyKey> {
                   .setDefaultValue("/tmp/alluxio/data")
                   .setDescription("it is for the input stream of version 1024")
                   .build();
+
+  public static final PropertyKey USER_FILE_MMAP_BYTES =
+          new Builder(Name.USER_FILE_MMAP_BYTES)
+                  .setDefaultValue(Integer.MAX_VALUE / 2)
+                  .setDescription("it is for the blockInStream map size ")
+                  .build();
+
+
+  public static final PropertyKey USER_FILE_MAX_MMAP_BYTES=
+          new Builder(Name.USER_FILE_MAX_MMAP_BYTES)
+                  .setDefaultValue(Integer.MAX_VALUE)
+                  .setDescription("it is for the blockInStream max map size ")
+                  .build();
+
   /**
    * @deprecated It will be removed in 2.0.0.
    */
@@ -3547,6 +3561,11 @@ public final class PropertyKey implements Comparable<PropertyKey> {
     public static final String USER_UFS_BLOCK_READ_CONCURRENCY_MAX =
         "alluxio.user.ufs.block.read.concurrency.max";
     public static final String USER_SHORT_CIRCUIT_ENABLED = "alluxio.user.short.circuit.enabled";
+
+    public static final String USER_FILE_MMAP_BYTES = "alluxio.user.file.mmap.bytes";
+
+    public static final String USER_FILE_MAX_MMAP_BYTES = "alluxio.user.file.max.mmap.bytes";
+
 
     //
     // FUSE integration related properties

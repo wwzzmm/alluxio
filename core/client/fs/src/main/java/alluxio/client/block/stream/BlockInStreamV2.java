@@ -103,7 +103,7 @@ public class BlockInStreamV2 extends BlockInStream implements Input {
    * @param context the file system context
    * @param info the block info
    * @param dataSource the Alluxio worker which should read the data
-   * @param dataSourceType the source location of the block
+   * @param dataSource the source location of the block
    * @param options the instream options
    * @return the {@link BlockInStreamV2} object
    */
