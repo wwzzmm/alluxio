@@ -96,8 +96,8 @@ public final class FileInStreamIntegrationTest extends BaseIntegrationTest {
 
   private List<CreateFileOptions> getOptionSet() {
     List<CreateFileOptions> ret = new ArrayList<>(3);
-    ret.add(mWriteBoth);
-    ret.add(mWriteAlluxio);
+//    ret.add(mWriteBoth);
+//    ret.add(mWriteAlluxio);
     ret.add(mWriteUnderStore);
     return ret;
   }

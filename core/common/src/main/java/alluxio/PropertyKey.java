@@ -2232,7 +2232,7 @@ public final class PropertyKey implements Comparable<PropertyKey> {
           .build();
   public static final PropertyKey USER_BLOCK_SIZE_BYTES_DEFAULT =
       new Builder(Name.USER_BLOCK_SIZE_BYTES_DEFAULT)
-          .setDefaultValue("512MB")
+          .setDefaultValue("5120MB")
           .setDescription("Default block size for Alluxio files.")
           .setConsistencyCheckLevel(ConsistencyCheckLevel.WARN)
           .setScope(Scope.CLIENT)
@@ -2308,6 +2308,41 @@ public final class PropertyKey implements Comparable<PropertyKey> {
           .setConsistencyCheckLevel(ConsistencyCheckLevel.WARN)
           .setScope(Scope.CLIENT)
           .build();
+
+  public static final PropertyKey USER_FILE_IN_STREAM_VERSION =
+          new Builder(Name.USER_FILE_IN_STREAM_VERSION)
+                  .setDefaultValue(1)
+                  .setDescription("the version of input stream")
+                  .build();
+  public static final PropertyKey USER_FILE_LOCAL_RETRY_TIME =
+          new Builder(Name.USER_FILE_LOCAL_RETRY_TIME)
+                  .setDefaultValue(2)
+                  .setDescription("the retry time of localizing the target file")
+                  .build();
+  public static final PropertyKey USER_FILE_LOCAL_RETRY_SLEEP_STEP =
+          new Builder(Name.USER_FILE_LOCAL_RETRY_SLEEP_STEP)
+                  .setDefaultValue(2000)
+                  .setDescription("the retry time of localizing the target file")
+                  .build();
+  public static final PropertyKey USER_LOCAL_FILE_IN_STREAM_TMP_PATH =
+          new Builder(Name.USER_LOCAL_FILE_IN_STREAM_TMP_PATH)
+                  .setDefaultValue("/tmp/alluxio/data")
+                  .setDescription("it is for the input stream of version 1024")
+                  .build();
+
+  public static final PropertyKey USER_FILE_MMAP_BYTES =
+          new Builder(Name.USER_FILE_MMAP_BYTES)
+                  .setDefaultValue(Integer.MAX_VALUE / 2)
+                  .setDescription("it is for the blockInStream map size ")
+                  .build();
+
+
+  public static final PropertyKey USER_FILE_MAX_MMAP_BYTES=
+          new Builder(Name.USER_FILE_MAX_MMAP_BYTES)
+                  .setDefaultValue(Integer.MAX_VALUE)
+                  .setDescription("it is for the blockInStream max map size ")
+                  .build();
+
   /**
    * @deprecated It will be removed in 2.0.0.
    */
@@ -3432,6 +3467,14 @@ public final class PropertyKey implements Comparable<PropertyKey> {
     public static final String USER_FAILED_SPACE_REQUEST_LIMITS =
         "alluxio.user.failed.space.request.limits";
     public static final String USER_FILE_BUFFER_BYTES = "alluxio.user.file.buffer.bytes";
+    public static final String USER_FILE_IN_STREAM_VERSION =
+            "alluxio.user.local.fileinstream.version";
+    public static final String USER_FILE_LOCAL_RETRY_TIME =
+            "alluxio.user.local.retry.time";
+    public static final String USER_LOCAL_FILE_IN_STREAM_TMP_PATH =
+            "alluxio.user.local.fileinstream.tmp.path";
+    public static final String USER_FILE_LOCAL_RETRY_SLEEP_STEP =
+            "alluxio.user.local.retry.sleep.step";
     public static final String USER_FILE_CACHE_PARTIALLY_READ_BLOCK =
         "alluxio.user.file.cache.partially.read.block";
     public static final String USER_FILE_COPY_FROM_LOCAL_WRITE_LOCATION_POLICY =
@@ -3518,6 +3561,11 @@ public final class PropertyKey implements Comparable<PropertyKey> {
     public static final String USER_UFS_BLOCK_READ_CONCURRENCY_MAX =
         "alluxio.user.ufs.block.read.concurrency.max";
     public static final String USER_SHORT_CIRCUIT_ENABLED = "alluxio.user.short.circuit.enabled";
+
+    public static final String USER_FILE_MMAP_BYTES = "alluxio.user.file.mmap.bytes";
+
+    public static final String USER_FILE_MAX_MMAP_BYTES = "alluxio.user.file.max.mmap.bytes";
+
 
     //
     // FUSE integration related properties
