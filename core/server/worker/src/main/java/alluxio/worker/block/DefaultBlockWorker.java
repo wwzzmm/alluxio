@@ -33,6 +33,7 @@ import alluxio.retry.RetryUtils;
 import alluxio.thrift.BlockWorkerClientService;
 import alluxio.underfs.UfsManager;
 import alluxio.util.CommonUtils;
+import alluxio.util.IdUtils;
 import alluxio.util.ThreadFactoryUtils;
 import alluxio.wire.FileInfo;
 import alluxio.wire.WorkerNetAddress;
@@ -333,7 +334,11 @@ public final class DefaultBlockWorker extends AbstractWorker implements BlockWor
           InetSocketAddress.createUnresolved(mAddress.getHost(), mAddress.getRpcPort());
       throw new WorkerOutOfSpaceException(ExceptionMessage.CANNOT_REQUEST_SPACE
           .getMessageWithUrl(RuntimeConstants.ALLUXIO_DEBUG_DOCS_URL, address, blockId), e);
-    }
+    } catch (BlockAlreadyExistsException print){
+      long fileId = IdUtils.fileIdFromBlockId(blockId);
+      LOG.info("blockID{},filePath{}",blockId,mFileSystemMasterClient.getFileInfo(fileId).getPath());
+      throw print;
+  }
     return createdBlock.getPath();
   }
 

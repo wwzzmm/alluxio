@@ -579,7 +579,7 @@ public final class FileInStreamV2Test {
       fail("seeking past the end of the stream should fail");
     } catch (IllegalArgumentException e) {
       assertEquals(String.format(PreconditionMessage.ERR_SEEK_PAST_END_OF_FILE.toString(),
-          BLOCK_LENGTH + 1), e.getMessage());
+          BLOCK_LENGTH + 1,BLOCK_LENGTH), e.getMessage());
     }
   }
 

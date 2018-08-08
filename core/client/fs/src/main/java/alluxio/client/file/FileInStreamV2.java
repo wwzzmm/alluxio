@@ -111,7 +111,21 @@ public class FileInStreamV2 extends FileInStream {
     }
 
   }
-
+  /**
+   * Creates a new file input stream.
+   *
+   * @param status  the file status
+   * @param options the client options
+   * @param context file system context
+   * @return the created {@link FileInStreamV2} instance
+   */
+  public static FileInStream create(URIStatus status, InStreamOptions options,
+                                    FileSystemContext context) {
+    if (status.getLength() == -1) {
+      throw new UnsupportedOperationException("FileInStreamV2 not support unknown size file");
+    }
+    return new FileInStreamV2(status, options, context);
+  }
   /* Input Stream methods */
   @Override
   public int read() throws IOException {

@@ -25,6 +25,7 @@ import alluxio.client.file.FileSystemContext;
 import alluxio.client.file.options.InStreamOptions;
 import alluxio.client.file.options.OutStreamOptions;
 import alluxio.client.file.policy.FileWriteLocationPolicy;
+import alluxio.exception.AlluxioException;
 import alluxio.exception.ExceptionMessage;
 import alluxio.exception.PreconditionMessage;
 import alluxio.exception.status.NotFoundException;
@@ -126,6 +127,17 @@ public final class AlluxioBlockStore {
           .collect(toList());
     }
   }
+
+  /**
+   * @return the info of all active block workers
+   * @throws IOException      when work info list cannot be obtained from master
+   * @throws AlluxioException if network connection failed
+   */
+  @Deprecated
+  public List<BlockWorkerInfo> getWorkerInfoList() throws IOException{
+    return getAllWorkers();
+  }
+
 
   /**
    * Gets a stream to read the data of a block. This method is primarily responsible for

@@ -19,9 +19,6 @@ import alluxio.client.block.SeekUnsupportedException;
 import alluxio.client.block.stream.BlockInStream;
 import alluxio.client.file.options.InStreamOptions;
 import alluxio.exception.PreconditionMessage;
-import alluxio.exception.status.DeadlineExceededException;
-import alluxio.exception.status.UnavailableException;
-import alluxio.retry.CountingRetry;
 import alluxio.wire.WorkerNetAddress;
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
@@ -29,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
-import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,8 +51,8 @@ import java.util.Map;
  */
 @PublicApi
 @NotThreadSafe
-public class FileInStreamV1024 extends FileInStream {
-  private static final Logger LOG = LoggerFactory.getLogger(FileInStreamV1024.class);
+public class FileInStreamV5 extends FileInStream {
+  private static final Logger LOG = LoggerFactory.getLogger(FileInStreamV5.class);
   private static final int MAX_WORKERS_TO_RETRY =
       Configuration.getInt(PropertyKey.USER_BLOCK_WORKER_CLIENT_READ_RETRY);
 
@@ -75,15 +71,12 @@ public class FileInStreamV1024 extends FileInStream {
 
   /** Underlying block stream, null if a position change has invalidated the previous stream. */
   private BlockInStream mBlockInStream;
-  private String mTmpBlockPath;
 
   /** A map of worker addresses to the most recent epoch time when client fails to read from it. */
   private Map<WorkerNetAddress, Long> mFailedWorkers = new HashMap<>();
 
-  protected FileInStreamV1024(URIStatus status, InStreamOptions options, FileSystemContext context, String tmpBlockPath) {
-    super(status,options,context);
-    this.mTmpBlockPath = tmpBlockPath;
-
+  protected FileInStreamV5(URIStatus status, InStreamOptions options, FileSystemContext context) {
+    super(status, options, context);
     mStatus = status;
     mOptions = options;
     mBlockStore = AlluxioBlockStore.create(context);
@@ -125,18 +118,7 @@ public class FileInStreamV1024 extends FileInStream {
     if (getPos() == mLength) { // at end of file
       return -1;
     }
-    CountingRetry retry = new CountingRetry(MAX_WORKERS_TO_RETRY);
-    IOException lastException = null;
-    do {
-      try {
-        return mBlockInStream.read();
-      } catch (UnavailableException | DeadlineExceededException | ConnectException e) {
-        lastException = e;
-        handleRetryableException(mBlockInStream, e);
-        mBlockInStream = null;
-      }
-    } while (retry.attempt());
-    throw lastException;
+    return mBlockInStream.read();
   }
 
   @Override
@@ -203,7 +185,7 @@ public class FileInStreamV1024 extends FileInStream {
     }
     Preconditions.checkArgument(pos >= 0, PreconditionMessage.ERR_SEEK_NEGATIVE.toString(), pos);
     Preconditions.checkArgument(pos <= mLength,
-        PreconditionMessage.ERR_SEEK_PAST_END_OF_FILE.toString(), pos);
+        "Seek position past end of file: %s,file length:%s", pos, mLength);
     mBlockInStream.seek(pos);
   }
 
@@ -242,6 +224,7 @@ public class FileInStreamV1024 extends FileInStream {
 
     mFailedWorkers.put(workerAddress, System.currentTimeMillis());
   }
+
   @Override
   public int readByte() throws IOException {
     return input.readByte();

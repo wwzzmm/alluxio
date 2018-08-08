@@ -24,6 +24,7 @@ import alluxio.network.netty.NettyRPC;
 import alluxio.network.netty.NettyRPCContext;
 import alluxio.proto.dataserver.Protocol;
 import alluxio.util.io.BufferUtils;
+import alluxio.util.network.NettyUtils;
 import alluxio.util.proto.ProtoMessage;
 import alluxio.wire.BlockInfo;
 import alluxio.wire.WorkerNetAddress;
@@ -177,6 +178,22 @@ public class BlockInStreamV2 extends BlockInStream implements Input {
           .call(NettyRPCContext.defaults().setChannel(mChannel).setTimeout(READ_TIMEOUT_MS),
               new ProtoMessage(request));
       Preconditions.checkState(message.isLocalBlockOpenResponse());
+
+      mCloser.register(new Closeable() {
+        @Override
+        public void close() throws IOException {
+          try {
+            Protocol.LocalBlockCloseRequest request =
+                    Protocol.LocalBlockCloseRequest.newBuilder().setBlockId(mBlockId).build();
+            NettyRPC.call(NettyRPCContext.defaults().setChannel(mChannel).setTimeout(READ_TIMEOUT_MS), new ProtoMessage(request));
+          }catch (Exception e){
+            NettyUtils.enableAutoRead(mChannel);
+            throw e;
+          }finally {
+            context.releaseNettyChannel(address, mChannel);
+          }
+        }
+      });
       return message.asLocalBlockOpenResponse().getPath();
 
     } catch (Exception e) {

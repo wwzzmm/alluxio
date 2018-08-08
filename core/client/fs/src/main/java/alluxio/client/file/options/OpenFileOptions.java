@@ -250,6 +250,7 @@ public final class OpenFileOptions {
     OpenFileOptions that = (OpenFileOptions) o;
     return Objects.equal(mCacheLocationPolicy, that.mCacheLocationPolicy)
         && Objects.equal(mReadType, that.mReadType)
+            && Objects.equal(mVersion, that.mVersion)
         && Objects.equal(mMaxUfsReadConcurrency, that.mMaxUfsReadConcurrency)
         && Objects.equal(mUfsReadLocationPolicy, that.mUfsReadLocationPolicy);
   }
@@ -257,7 +258,7 @@ public final class OpenFileOptions {
   @Override
   public int hashCode() {
     return Objects.hashCode(mCacheLocationPolicy, mReadType, mMaxUfsReadConcurrency,
-        mUfsReadLocationPolicy);
+        mUfsReadLocationPolicy,mVersion);
   }
 
   @Override
@@ -267,6 +268,7 @@ public final class OpenFileOptions {
         .add("maxUfsReadConcurrency", mMaxUfsReadConcurrency)
         .add("readType", mReadType)
         .add("ufsReadLocationPolicy", mUfsReadLocationPolicy)
+            .add("mVersion", mVersion)
         .toString();
   }
 
@@ -277,5 +279,14 @@ public final class OpenFileOptions {
   public OpenFileOptions setVersion(int version) {
     this.mVersion = version;
     return this;
+  }
+  @Deprecated
+  public OpenFileOptions setFileStreamVersion(int version){
+    return setVersion(version);
+  }
+
+  @Deprecated
+  public int getFileStreamVersion() {
+    return this.mVersion;
   }
 }

@@ -13,6 +13,7 @@ package alluxio.worker.netty;
 
 import alluxio.Configuration;
 import alluxio.PropertyKey;
+import alluxio.exception.BlockAlreadyExistsException;
 import alluxio.exception.status.AlluxioStatusException;
 import alluxio.exception.status.InternalException;
 import alluxio.exception.status.InvalidArgumentException;
@@ -143,7 +144,11 @@ abstract class AbstractWriteHandler<T extends WriteRequestContext<?>>
         // state. Note that, we reset the context before validation msg as validation may require to
         // update error in context.
         Preconditions.checkState(isNewContextCreated);
-        initRequestContext(mContext);
+        try {
+          initRequestContext(mContext);
+        }catch (BlockAlreadyExistsException ae){
+          LOG.info("---blockID{},UfsPath{}",writeRequest.getId(),writeRequest.getCreateUfsFileOptions().getUfsPath());
+        }
       }
 
       // If we have seen an error, return early and release the data. This can

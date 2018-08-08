@@ -109,6 +109,17 @@ public final class Configuration {
     PROPERTIES.merge(properties, source);
   }
 
+  /**
+   * Merges the current configuration properties with new properties. If a property exists
+   * both in the new and current configuration, the one from the new configuration wins if
+   * its priority is higher or equal than the existing one.
+   *
+   * @param properties the source {@link Properties} to be merged
+   */
+  public static void merge(Map<?, ?> properties) {
+    PROPERTIES.merge(properties, Source.RUNTIME);
+  }
+
   // Public accessor methods
   /**
    * Sets the value for the appropriate key in the {@link Properties}.

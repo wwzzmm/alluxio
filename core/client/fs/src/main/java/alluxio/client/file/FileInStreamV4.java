@@ -19,6 +19,9 @@ import alluxio.client.block.SeekUnsupportedException;
 import alluxio.client.block.stream.BlockInStream;
 import alluxio.client.file.options.InStreamOptions;
 import alluxio.exception.PreconditionMessage;
+import alluxio.exception.status.DeadlineExceededException;
+import alluxio.exception.status.UnavailableException;
+import alluxio.retry.CountingRetry;
 import alluxio.wire.WorkerNetAddress;
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
@@ -26,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,12 +75,15 @@ public class FileInStreamV4 extends FileInStream {
 
   /** Underlying block stream, null if a position change has invalidated the previous stream. */
   private BlockInStream mBlockInStream;
+  private String mTmpBlockPath;
 
   /** A map of worker addresses to the most recent epoch time when client fails to read from it. */
   private Map<WorkerNetAddress, Long> mFailedWorkers = new HashMap<>();
 
-  protected FileInStreamV4(URIStatus status, InStreamOptions options, FileSystemContext context) {
-    super(status, options, context);
+  protected FileInStreamV4(URIStatus status, InStreamOptions options, FileSystemContext context, String tmpBlockPath) {
+    super(status,options,context);
+    this.mTmpBlockPath = tmpBlockPath;
+
     mStatus = status;
     mOptions = options;
     mBlockStore = AlluxioBlockStore.create(context);
@@ -112,13 +119,40 @@ public class FileInStreamV4 extends FileInStream {
 
   }
 
+  /**
+   * Creates a new file input stream.
+   *
+   * @param status  the file status
+   * @param options the client options
+   * @param context file system context
+   * @return the created {@link FileInStreamV4} instance
+   */
+  public static FileInStream create(URIStatus status, InStreamOptions options,
+                                    FileSystemContext context, String tmpBlockPath) {
+    if (status.getLength() == -1) {
+      throw new UnsupportedOperationException("FileInStreamV4 not support unknown size file");
+    }
+    return new FileInStreamV4(status, options, context, tmpBlockPath);
+  }
+
   /* Input Stream methods */
   @Override
   public int read() throws IOException {
     if (getPos() == mLength) { // at end of file
       return -1;
     }
-    return mBlockInStream.read();
+    CountingRetry retry = new CountingRetry(MAX_WORKERS_TO_RETRY);
+    IOException lastException = null;
+    do {
+      try {
+        return mBlockInStream.read();
+      } catch (UnavailableException | DeadlineExceededException | ConnectException e) {
+        lastException = e;
+        handleRetryableException(mBlockInStream, e);
+        mBlockInStream = null;
+      }
+    } while (retry.attempt());
+    throw lastException;
   }
 
   @Override
@@ -185,7 +219,7 @@ public class FileInStreamV4 extends FileInStream {
     }
     Preconditions.checkArgument(pos >= 0, PreconditionMessage.ERR_SEEK_NEGATIVE.toString(), pos);
     Preconditions.checkArgument(pos <= mLength,
-        "Seek position past end of file: %s,file length:%s", pos, mLength);
+        PreconditionMessage.ERR_SEEK_PAST_END_OF_FILE.toString(), pos);
     mBlockInStream.seek(pos);
   }
 
@@ -224,7 +258,6 @@ public class FileInStreamV4 extends FileInStream {
 
     mFailedWorkers.put(workerAddress, System.currentTimeMillis());
   }
-
   @Override
   public int readByte() throws IOException {
     return input.readByte();

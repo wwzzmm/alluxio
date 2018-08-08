@@ -203,7 +203,7 @@ public class BaseFileSystem implements FileSystem {
     @Override
     public void delete(AlluxioURI path)
             throws DirectoryNotEmptyException, FileDoesNotExistException, IOException, AlluxioException {
-        delete(path, DeleteOptions.defaults());
+        delete(path, DeleteOptions.defaults().setUnchecked(true));
     }
 
     @Override
@@ -509,6 +509,7 @@ public class BaseFileSystem implements FileSystem {
             mFileSystemContext.releaseMasterClient(masterClient);
         }
     }
+
     private FileInStream createNormalStream(URIStatus status, InStreamOptions inStreamOptions) {
         LOG.warn(
                 "Oops!path:{} localization is failed after retry {} times,and return normal file in stream that can't random read",
@@ -531,6 +532,7 @@ public class BaseFileSystem implements FileSystem {
     private boolean isEmptyFile(URIStatus status) {
         return status.getLength() == 0;
     }
+
     private void localize(AlluxioURI path, URIStatus status, long sleepStep)
             throws Exception {
         CountingRetry retry = new CountingRetry(RETRY_TIME);
@@ -552,9 +554,14 @@ public class BaseFileSystem implements FileSystem {
             }
         }
     }
+
+    private String bindHostname(String path) {
+        return AlluxioURI.SEPARATOR + NetworkAddressUtils.getLocalHostName() + path;
+    }
+
     public void processLocalization(AlluxioURI path, URIStatus status) throws Exception {
         if (zkEnable()) {
-            InterProcessMutex lock = new InterProcessMutex(client, path.getPath());
+            InterProcessMutex lock = new InterProcessMutex(client, bindHostname(path.getPath()));
             if (lock.acquire(60, TimeUnit.SECONDS)) {
                 try {
                     if (!isLocalWorker(fetchBlockInfo(status))) {
@@ -578,7 +585,7 @@ public class BaseFileSystem implements FileSystem {
                 NetworkAddressUtils.getLocalHostName());
         try (Closer closer = Closer.create()) {
             OpenFileOptions options = OpenFileOptions.defaults()
-                    .setReadType(ReadType.CACHE_PROMOTE)
+                    .setReadType(ReadType.CACHE)
                     .setVersion(1)
                     .setCacheLocationPolicy(new SpecificHostPolicy(NetworkAddressUtils.getLocalHostName()));
             FileInStream in = closer
@@ -632,8 +639,9 @@ public class BaseFileSystem implements FileSystem {
         FileUtils.forceMkdir(new File(dataPath));
         String fullPath = genTmpPath(dataPath, String.valueOf(status.getBlockIds().get(0)));
         forceLocalDisk(status, fullPath);
-        return new FileInStreamV1024(status, inStreamOptions, mFileSystemContext, fullPath);
+        return new FileInStreamV4(status, inStreamOptions, mFileSystemContext, fullPath);
     }
+
     private static String genTmpPath(String dataPath, String blockID) {
 
         String name = UUID.randomUUID().toString() + "." + blockID;
@@ -687,6 +695,7 @@ public class BaseFileSystem implements FileSystem {
         }
         return false;
     }
+
     private BlockInfo fetchBlockInfo(URIStatus status) throws Exception {
         Preconditions.checkNotNull(status);
         Preconditions.checkNotNull(status.getBlockIds());

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -56,7 +57,7 @@ public final class MasterBlockInfo {
     mBlockId = blockId;
     mLength = length;
 
-    mWorkerIdToAlias = new HashMap<>();
+    mWorkerIdToAlias = new ConcurrentHashMap<>();
   }
 
   /**

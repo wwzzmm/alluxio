@@ -152,7 +152,7 @@
     <libthrift.version>0.9.3</libthrift.version>
     <license.header.path>build/license/</license.header.path>
     <log4j.version>1.2.17</log4j.version>
-    <maven.version>3.3.9</maven.version>
+    <maven.version>3.0.5</maven.version>
     <metrics.version>3.1.2</metrics.version>
     <powermock.version>1.6.1</powermock.version>
     <prometheus.version>0.3.0</prometheus.version>
@@ -317,7 +317,7 @@
       <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty-all</artifactId>
-        <version>4.0.53.Final</version>
+        <version>4.1.17.Final</version>
       </dependency>
       <dependency>
         <groupId>io.prometheus</groupId>
@@ -953,6 +953,7 @@
                 <exclude>io.netty:netty-all</exclude>
                 <exclude>org.apache.curator</exclude>
                 <exclude>org.apache.zookeeper</exclude>
+                <exclude>javax.servlet</exclude>
               </excludes>
             </artifactSet>
           </configuration>
