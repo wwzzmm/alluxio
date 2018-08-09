@@ -135,4 +135,10 @@ public class OutStreamOptionsTest {
   public void equalsTest() throws Exception {
     alluxio.test.util.CommonUtils.testEquals(OutStreamOptions.class);
   }
+
+  @Test
+  public void test(){
+    Configuration.set(PropertyKey.USER_BLOCK_SIZE_BYTES_DEFAULT, "7000");
+  }
+
 }

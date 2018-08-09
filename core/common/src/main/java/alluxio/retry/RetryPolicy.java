@@ -28,6 +28,7 @@ public interface RetryPolicy {
    */
   int getAttemptCount();
 
+
   /**
    * Waits until it is time to perform the next retry, then returns. Returns false if no further
    * retries should be performed. The first call to this method should never delay the caller, this
@@ -36,4 +37,5 @@ public interface RetryPolicy {
    * @return whether another retry should be performed
    */
   boolean attempt();
+
 }

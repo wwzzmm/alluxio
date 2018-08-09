@@ -47,6 +47,7 @@ public final class CreateDirectoryOptions {
    */
   public static CreateDirectoryOptions defaults() {
     return new CreateDirectoryOptions();
+//            .setMode(new Mode(Mode.Bits.ALL,Mode.Bits.ALL,Mode.Bits.ALL));
   }
 
   private CreateDirectoryOptions() {

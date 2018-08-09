@@ -24,6 +24,7 @@ import alluxio.network.netty.NettyRPC;
 import alluxio.network.netty.NettyRPCContext;
 import alluxio.proto.dataserver.Protocol;
 import alluxio.util.io.BufferUtils;
+import alluxio.util.network.NettyUtils;
 import alluxio.util.proto.ProtoMessage;
 import alluxio.wire.BlockInfo;
 import alluxio.wire.WorkerNetAddress;
@@ -34,10 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
@@ -178,10 +176,20 @@ public class BlockInStreamV2 extends BlockInStream implements Input {
               new ProtoMessage(request));
       Preconditions.checkState(message.isLocalBlockOpenResponse());
       return message.asLocalBlockOpenResponse().getPath();
-
     } catch (Exception e) {
       context.releaseNettyChannel(address, mChannel);
       throw e;
+    }finally {
+      try {
+        Protocol.LocalBlockCloseRequest closeRequest =
+                Protocol.LocalBlockCloseRequest.newBuilder().setBlockId(mBlockId).build();
+        NettyRPC.call(NettyRPCContext.defaults().setChannel(mChannel).setTimeout(READ_TIMEOUT_MS), new ProtoMessage(closeRequest));
+      }catch (Exception e){
+        NettyUtils.enableAutoRead(mChannel);
+        throw e;
+      }finally {
+        context.releaseNettyChannel(address, mChannel);
+      }
     }
   }
 

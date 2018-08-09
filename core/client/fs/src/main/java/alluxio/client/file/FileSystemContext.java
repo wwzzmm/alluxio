@@ -236,7 +236,7 @@ public final class FileSystemContext implements Closeable {
   }
 
   /**
-   * Resets the context. It is only used in {@link alluxio.hadoop.AbstractFileSystem} and tests to
+   * Resets the context. It is only used in {@link } and tests to
    * reset the default file system context.
    *
    * @param configuration the instance configuration

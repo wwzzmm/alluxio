@@ -2269,6 +2269,12 @@ public final class PropertyKey implements Comparable<PropertyKey> {
           .setDescription("The maximum number of workers to retry before the client gives up on "
               + " reading a block")
           .build();
+  public static final PropertyKey USER_UFS_DELEGATION_ENABLED =
+          new Builder(Name.USER_UFS_DELEGATION_ENABLED)
+                  .setDefaultValue(true)
+                  .setDescription("alluxio.user.ufs.delegation.enabled true")
+                  .build();
+
   public static final PropertyKey USER_CONF_CLUSTER_DEFAULT_ENABLED =
       new Builder(Name.USER_CONF_CLUSTER_DEFAULT_ENABLED)
           .setDefaultValue(true)
@@ -2341,6 +2347,12 @@ public final class PropertyKey implements Comparable<PropertyKey> {
           new Builder(Name.USER_FILE_MAX_MMAP_BYTES)
                   .setDefaultValue(Integer.MAX_VALUE)
                   .setDescription("it is for the blockInStream max map size ")
+                  .build();
+
+  public static final PropertyKey USER_FILE_IN_STREAM_CACHE_TIER=
+          new Builder(Name.USER_FILE_IN_STREAM_CACHE_TIER)
+                  .setDefaultValue(0)
+                  .setDescription("it is for the cache tier ")
                   .build();
 
   /**
@@ -3461,6 +3473,8 @@ public final class PropertyKey implements Comparable<PropertyKey> {
         "alluxio.user.block.worker.client.pool.gc.threshold";
     public static final String USER_BLOCK_WORKER_CLIENT_READ_RETRY =
         "alluxio.user.block.worker.client.read.retry";
+    public static final String USER_UFS_DELEGATION_ENABLED =
+            "alluxio.user.ufs.delegation.enabled";
     public static final String USER_CONF_CLUSTER_DEFAULT_ENABLED =
         "alluxio.user.conf.cluster.default.enabled";
     public static final String USER_DATE_FORMAT_PATTERN = "alluxio.user.date.format.pattern";
@@ -3547,7 +3561,6 @@ public final class PropertyKey implements Comparable<PropertyKey> {
     public static final String USER_RPC_RETRY_MAX_NUM_RETRY =
         "alluxio.user.rpc.retry.max.num.retry";
     public static final String USER_RPC_RETRY_MAX_SLEEP_MS = "alluxio.user.rpc.retry.max.sleep";
-    public static final String USER_UFS_DELEGATION_ENABLED = "alluxio.user.ufs.delegation.enabled";
     public static final String USER_UFS_DELEGATION_READ_BUFFER_SIZE_BYTES =
         "alluxio.user.ufs.delegation.read.buffer.size.bytes";
     public static final String USER_UFS_DELEGATION_WRITE_BUFFER_SIZE_BYTES =
@@ -3565,7 +3578,7 @@ public final class PropertyKey implements Comparable<PropertyKey> {
     public static final String USER_FILE_MMAP_BYTES = "alluxio.user.file.mmap.bytes";
 
     public static final String USER_FILE_MAX_MMAP_BYTES = "alluxio.user.file.max.mmap.bytes";
-
+    public static final String USER_FILE_IN_STREAM_CACHE_TIER = "alluxio.user.local.fileinstream.cache_tier";
 
     //
     // FUSE integration related properties

@@ -575,7 +575,6 @@ public final class FileSystemMasterTest {
       // Expected case.
     }
   }
-
   /**
    * Tests the {@link FileSystemMaster#getPersistenceState(long)} method.
    */
