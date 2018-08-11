@@ -42,6 +42,7 @@ public final class OpenFileOptions {
   /** The location policy to determine the worker location to serve UFS block reads. */
   private BlockLocationPolicy mUfsReadLocationPolicy;
   private int mVersion = Configuration.getInt(PropertyKey.USER_FILE_IN_STREAM_VERSION);
+  private int mCacheTier = Configuration.getInt(PropertyKey.USER_FILE_IN_STREAM_CACHE_TIER);
 
   /**
    * @return the default {@link InStreamOptions}
@@ -250,7 +251,8 @@ public final class OpenFileOptions {
     OpenFileOptions that = (OpenFileOptions) o;
     return Objects.equal(mCacheLocationPolicy, that.mCacheLocationPolicy)
         && Objects.equal(mReadType, that.mReadType)
-            && Objects.equal(mVersion, that.mVersion)
+        && Objects.equal(mVersion, that.mVersion)
+        && Objects.equal(mCacheTier, that.mVersion)
         && Objects.equal(mMaxUfsReadConcurrency, that.mMaxUfsReadConcurrency)
         && Objects.equal(mUfsReadLocationPolicy, that.mUfsReadLocationPolicy);
   }
@@ -258,7 +260,7 @@ public final class OpenFileOptions {
   @Override
   public int hashCode() {
     return Objects.hashCode(mCacheLocationPolicy, mReadType, mMaxUfsReadConcurrency,
-        mUfsReadLocationPolicy,mVersion);
+        mUfsReadLocationPolicy,mVersion,mCacheTier);
   }
 
   @Override
@@ -269,6 +271,7 @@ public final class OpenFileOptions {
         .add("readType", mReadType)
         .add("ufsReadLocationPolicy", mUfsReadLocationPolicy)
             .add("mVersion", mVersion)
+            .add("mCacheTier",mCacheTier)
         .toString();
   }
 
@@ -280,6 +283,15 @@ public final class OpenFileOptions {
     this.mVersion = version;
     return this;
   }
+
+  public int getCacheTier() {
+    return mCacheTier;
+  }
+
+  public void setCacheTier(int mCacheTier) {
+    this.mCacheTier = mCacheTier;
+  }
+
   @Deprecated
   public OpenFileOptions setFileStreamVersion(int version){
     return setVersion(version);

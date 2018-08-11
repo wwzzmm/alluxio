@@ -2051,6 +2051,15 @@ public final class PropertyKey implements Comparable<PropertyKey> {
           .setScope(Scope.WORKER)
           .build();
 
+  public static final PropertyKey WORKER_BLOCK_CACHE_TIRE =
+          new Builder(Name.WORKER_BLOCK_CACHE_TIRE)
+                  .setDefaultValue(0)
+                  .setDescription("The cache tier of worker cache.")
+                  .setConsistencyCheckLevel(ConsistencyCheckLevel.WARN)
+                  .setScope(Scope.WORKER)
+                  .build();
+
+
   //
   // Proxy related properties
   //
@@ -3422,6 +3431,9 @@ public final class PropertyKey implements Comparable<PropertyKey> {
         "alluxio.worker.ufs.instream.cache.enabled";
     public static final String WORKER_UFS_INSTREAM_CACHE_MAX_SIZE =
         "alluxio.worker.ufs.instream.cache.max.size";
+
+    public static final String WORKER_BLOCK_CACHE_TIRE = "alluxio.worker.cahce.tier";
+
 
     //
     // Proxy related properties

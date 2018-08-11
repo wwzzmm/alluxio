@@ -1230,7 +1230,7 @@ public final class Protocol {
        * </pre>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          alluxio.proto.dataserver.Protocol.OpenUfsBlockOptions, alluxio.proto.dataserver.Protocol.OpenUfsBlockOptions.Builder, alluxio.proto.dataserver.Protocol.OpenUfsBlockOptionsOrBuilder> 
+          alluxio.proto.dataserver.Protocol.OpenUfsBlockOptions, alluxio.proto.dataserver.Protocol.OpenUfsBlockOptions.Builder, alluxio.proto.dataserver.Protocol.OpenUfsBlockOptionsOrBuilder>
           getOpenUfsBlockOptionsFieldBuilder() {
         if (openUfsBlockOptionsBuilder_ == null) {
           openUfsBlockOptionsBuilder_ = new com.google.protobuf.SingleFieldBuilder<
@@ -1327,6 +1327,17 @@ public final class Protocol {
      * <code>optional int64 length = 5;</code>
      */
     long getLength();
+
+    // optional int32 length = 6;
+
+    /**
+     * <code>optional int32 cachetier = 6;</code>
+     */
+    int getCacheTier();
+      /**
+       * <code>optional int32 cachetier = 6;</code>
+       */
+    boolean hasCacheTier();
   }
   /**
    * Protobuf type {@code alluxio.proto.dataserver.AsyncCacheRequest}
@@ -1417,6 +1428,11 @@ public final class Protocol {
               length_ = input.readInt64();
               break;
             }
+            case 48: {
+              bitField0_ |= 0x00000020;
+              cacheTier_ = input.readInt32();
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -1498,7 +1514,7 @@ public final class Protocol {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -1518,7 +1534,7 @@ public final class Protocol {
         getSourceHostBytes() {
       java.lang.Object ref = sourceHost_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         sourceHost_ = b;
@@ -1569,6 +1585,8 @@ public final class Protocol {
     // optional int64 length = 5;
     public static final int LENGTH_FIELD_NUMBER = 5;
     private long length_;
+      // optional int32 cacheTier_ = 6;
+    private int cacheTier_;
     /**
      * <code>optional int64 length = 5;</code>
      */
@@ -1581,6 +1599,17 @@ public final class Protocol {
     public long getLength() {
       return length_;
     }
+      /**
+       * <code>optional int32 cacheTier_ = 6;</code>
+       */
+    public boolean hasCacheTier() {
+      return ((bitField0_ & 0x00000020) == 0x00000020);
+    }
+
+    @Override
+    public int getCacheTier() {
+      return cacheTier_;
+    }
 
     private void initFields() {
       blockId_ = 0L;
@@ -1588,6 +1617,7 @@ public final class Protocol {
       sourcePort_ = 0;
       openUfsBlockOptions_ = alluxio.proto.dataserver.Protocol.OpenUfsBlockOptions.getDefaultInstance();
       length_ = 0L;
+      cacheTier_ = 0;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -1616,6 +1646,9 @@ public final class Protocol {
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         output.writeInt64(5, length_);
       }
+        if (((bitField0_ & 0x00000020) == 0x00000020)) {
+            output.writeInt32(6, cacheTier_);
+        }
       getUnknownFields().writeTo(output);
     }
 
@@ -1644,6 +1677,10 @@ public final class Protocol {
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(5, length_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+            size += com.google.protobuf.CodedOutputStream
+                    .computeInt32Size(6, cacheTier_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1781,6 +1818,8 @@ public final class Protocol {
         bitField0_ = (bitField0_ & ~0x00000008);
         length_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000010);
+        cacheTier_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000020);
         return this;
       }
 
@@ -1833,6 +1872,10 @@ public final class Protocol {
           to_bitField0_ |= 0x00000010;
         }
         result.length_ = length_;
+        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+          to_bitField0_ |= 0x00000020;
+        }
+        result.cacheTier_ = cacheTier_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1865,6 +1908,9 @@ public final class Protocol {
         }
         if (other.hasLength()) {
           setLength(other.getLength());
+        }
+        if(other.hasCacheTier()){
+            setCacheTier(other.getCacheTier());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1967,7 +2013,7 @@ public final class Protocol {
           getSourceHostBytes() {
         java.lang.Object ref = sourceHost_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           sourceHost_ = b;
@@ -2161,7 +2207,7 @@ public final class Protocol {
        * <code>optional .alluxio.proto.dataserver.OpenUfsBlockOptions open_ufs_block_options = 4;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          alluxio.proto.dataserver.Protocol.OpenUfsBlockOptions, alluxio.proto.dataserver.Protocol.OpenUfsBlockOptions.Builder, alluxio.proto.dataserver.Protocol.OpenUfsBlockOptionsOrBuilder> 
+          alluxio.proto.dataserver.Protocol.OpenUfsBlockOptions, alluxio.proto.dataserver.Protocol.OpenUfsBlockOptions.Builder, alluxio.proto.dataserver.Protocol.OpenUfsBlockOptionsOrBuilder>
           getOpenUfsBlockOptionsFieldBuilder() {
         if (openUfsBlockOptionsBuilder_ == null) {
           openUfsBlockOptionsBuilder_ = new com.google.protobuf.SingleFieldBuilder<
@@ -2176,6 +2222,8 @@ public final class Protocol {
 
       // optional int64 length = 5;
       private long length_ ;
+      // optional int32 length = 6;
+      private int cacheTier_;
       /**
        * <code>optional int64 length = 5;</code>
        */
@@ -2188,6 +2236,7 @@ public final class Protocol {
       public long getLength() {
         return length_;
       }
+
       /**
        * <code>optional int64 length = 5;</code>
        */
@@ -2197,6 +2246,39 @@ public final class Protocol {
         onChanged();
         return this;
       }
+
+
+      @Override
+      public int getCacheTier() {
+        return cacheTier_;
+      }
+
+      /**
+       * <code>optional int32 cacheTier = 6;</code>
+       */
+      public boolean hasCacheTier() {
+          return ((bitField0_ & 0x00000020) == 0x00000020);
+      }
+
+      /**
+       * <code>optional int32 cacheTier = 6;</code>
+       */
+      public Builder setCacheTier(int value){
+        bitField0_ |= 0x00000020;
+        cacheTier_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 cacheTier = 6;</code>
+       */
+      public Builder clearCacheTier() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        cacheTier_ = 0;
+        onChanged();
+        return this;
+      }
+
       /**
        * <code>optional int64 length = 5;</code>
        */
@@ -2336,6 +2418,22 @@ public final class Protocol {
      */
     com.google.protobuf.ByteString
         getUserBytes();
+      /**
+       * <code>optional int cacheTier = 8;</code>
+       *
+       * <pre>
+       *     noCache should be false and then set cache tier of the block locally when reading the data from the UFS.
+       * </pre>
+       */
+    int getCacheTier();
+      /**
+       * <code>optional int cacheTier = 8;</code>
+       *
+       * <pre>
+       *     noCache should be false and then set cache tier of the block locally when reading the data from the UFS.
+       * </pre>
+       */
+    boolean hasCacheTier();
   }
   /**
    * Protobuf type {@code alluxio.proto.dataserver.OpenUfsBlockOptions}
@@ -2428,6 +2526,11 @@ public final class Protocol {
               user_ = input.readBytes();
               break;
             }
+            case 64: {
+              bitField0_ |= 0x00000050;
+              cacheTier_ = input.readInt32();
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -2485,7 +2588,7 @@ public final class Protocol {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -2501,7 +2604,7 @@ public final class Protocol {
         getUfsPathBytes() {
       java.lang.Object ref = ufsPath_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         ufsPath_ = b;
@@ -2618,6 +2721,7 @@ public final class Protocol {
     // optional string user = 7;
     public static final int USER_FIELD_NUMBER = 7;
     private java.lang.Object user_;
+
     /**
      * <code>optional string user = 7;</code>
      *
@@ -2640,7 +2744,7 @@ public final class Protocol {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -2660,7 +2764,7 @@ public final class Protocol {
         getUserBytes() {
       java.lang.Object ref = user_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         user_ = b;
@@ -2669,8 +2773,30 @@ public final class Protocol {
         return (com.google.protobuf.ByteString) ref;
       }
     }
+    // optional int32 cacheTier_ = 8;
+    private int cacheTier_;
+      /**
+       * <code>optional int cacheTier = 8;</code>
+       *
+       * <pre>
+       *     noCache should be false and then set cache tier of the block locally when reading the data from the UFS.
+       * </pre>
+       */
+      public int getCacheTier() {
+          return cacheTier_;
+      }
+      /**
+       * <code>optional int cacheTier = 8;</code>
+       *
+       * <pre>
+       *     noCache should be false and then set cache tier of the block locally when reading the data from the UFS.
+       * </pre>
+       */
+      public boolean hasCacheTier(){
+          return ((bitField0_ & 0x00000050) == 0x00000050);
+      }
 
-    private void initFields() {
+      private void initFields() {
       ufsPath_ = "";
       offsetInFile_ = 0L;
       blockSize_ = 0L;
@@ -2678,6 +2804,7 @@ public final class Protocol {
       mountId_ = 0L;
       noCache_ = false;
       user_ = "";
+      cacheTier_ = 0;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -2711,6 +2838,9 @@ public final class Protocol {
       }
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
         output.writeBytes(7, getUserBytes());
+      }
+      if (((bitField0_ & 0x00000050) == 0x00000050)) {
+        output.writeInt32(8, getCacheTier());
       }
       getUnknownFields().writeTo(output);
     }
@@ -2748,6 +2878,10 @@ public final class Protocol {
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(7, getUserBytes());
+      }
+      if (((bitField0_ & 0x00000050) == 0x00000050)) {
+        size += com.google.protobuf.CodedOutputStream
+                .computeInt32Size(8, cacheTier_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -2884,6 +3018,8 @@ public final class Protocol {
         bitField0_ = (bitField0_ & ~0x00000020);
         user_ = "";
         bitField0_ = (bitField0_ & ~0x00000040);
+        cacheTier_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000050);
         return this;
       }
 
@@ -2940,6 +3076,10 @@ public final class Protocol {
           to_bitField0_ |= 0x00000040;
         }
         result.user_ = user_;
+        if (((from_bitField0_ & 0x00000050) == 0x00000050)) {
+          to_bitField0_ |= 0x00000050;
+        }
+        result.cacheTier_ = cacheTier_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -2980,6 +3120,9 @@ public final class Protocol {
           bitField0_ |= 0x00000040;
           user_ = other.user_;
           onChanged();
+        }
+        if(other.hasCacheTier()){
+          setCacheTier(other.getCacheTier());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -3037,7 +3180,7 @@ public final class Protocol {
           getUfsPathBytes() {
         java.lang.Object ref = ufsPath_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           ufsPath_ = b;
@@ -3248,16 +3391,54 @@ public final class Protocol {
 
       // optional bool no_cache = 6;
       private boolean noCache_ ;
-      /**
-       * <code>optional bool no_cache = 6;</code>
-       *
-       * <pre>
-       * If set, do not try to cache the block locally when reading the data from the UFS.
-       * </pre>
-       */
-      public boolean hasNoCache() {
-        return ((bitField0_ & 0x00000020) == 0x00000020);
-      }
+
+      // optional int32 cacheTier = 8;
+      private int cacheTier_ ;
+        /**
+         * <code>optional int cacheTier = 8;</code>
+         *
+         * <pre>
+         *     noCache should be false and then set cache tier of the block locally when reading the data from the UFS.
+         * </pre>
+         */
+        public int getCacheTier() {
+            return cacheTier_;
+        }
+        /**
+         * <code>optional int cacheTier = 8;</code>
+         *
+         * <pre>
+         *     noCache should be false and then set cache tier of the block locally when reading the data from the UFS.
+         * </pre>
+         */
+        public boolean hasCacheTier(){
+            return ((bitField0_ & 0x00000050) == 0x00000050);
+        }
+        /**
+         * <code>optional int cacheTier = 8;</code>
+         *
+         * <pre>
+         *     noCache should be false and then set cache tier of the block locally when reading the data from the UFS.
+         * </pre>
+         */
+        public Builder setCacheTier(int value){
+            bitField0_ |= 0x00000050;
+            cacheTier_ = value;
+            onChanged();
+            return this;
+        }
+
+        /**
+         * <code>optional bool no_cache = 6;</code>
+         *
+         * <pre>
+         * If set, do not try to cache the block locally when reading the data from the UFS.
+         * </pre>
+         */
+        public boolean hasNoCache() {
+            return ((bitField0_ & 0x00000020) == 0x00000020);
+        }
+
       /**
        * <code>optional bool no_cache = 6;</code>
        *
@@ -3336,7 +3517,7 @@ public final class Protocol {
           getUserBytes() {
         java.lang.Object ref = user_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           user_ = b;
@@ -4516,7 +4697,7 @@ public final class Protocol {
        * </pre>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          alluxio.proto.dataserver.Protocol.CreateUfsFileOptions, alluxio.proto.dataserver.Protocol.CreateUfsFileOptions.Builder, alluxio.proto.dataserver.Protocol.CreateUfsFileOptionsOrBuilder> 
+          alluxio.proto.dataserver.Protocol.CreateUfsFileOptions, alluxio.proto.dataserver.Protocol.CreateUfsFileOptions.Builder, alluxio.proto.dataserver.Protocol.CreateUfsFileOptionsOrBuilder>
           getCreateUfsFileOptionsFieldBuilder() {
         if (createUfsFileOptionsBuilder_ == null) {
           createUfsFileOptionsBuilder_ = new com.google.protobuf.SingleFieldBuilder<
@@ -4746,7 +4927,7 @@ public final class Protocol {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -4762,7 +4943,7 @@ public final class Protocol {
         getUfsPathBytes() {
       java.lang.Object ref = ufsPath_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         ufsPath_ = b;
@@ -4789,7 +4970,7 @@ public final class Protocol {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -4805,7 +4986,7 @@ public final class Protocol {
         getOwnerBytes() {
       java.lang.Object ref = owner_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         owner_ = b;
@@ -4832,7 +5013,7 @@ public final class Protocol {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -4848,7 +5029,7 @@ public final class Protocol {
         getGroupBytes() {
       java.lang.Object ref = group_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         group_ = b;
@@ -5225,7 +5406,7 @@ public final class Protocol {
           getUfsPathBytes() {
         java.lang.Object ref = ufsPath_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           ufsPath_ = b;
@@ -5299,7 +5480,7 @@ public final class Protocol {
           getOwnerBytes() {
         java.lang.Object ref = owner_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           owner_ = b;
@@ -5373,7 +5554,7 @@ public final class Protocol {
           getGroupBytes() {
         java.lang.Object ref = group_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           group_ = b;
@@ -5668,7 +5849,7 @@ public final class Protocol {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -5684,7 +5865,7 @@ public final class Protocol {
         getMessageBytes() {
       java.lang.Object ref = message_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         message_ = b;
@@ -6010,7 +6191,7 @@ public final class Protocol {
           getMessageBytes() {
         java.lang.Object ref = message_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           message_ = b;
@@ -7501,7 +7682,7 @@ public final class Protocol {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -7517,7 +7698,7 @@ public final class Protocol {
         getPathBytes() {
       java.lang.Object ref = path_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         path_ = b;
@@ -7789,7 +7970,7 @@ public final class Protocol {
           getPathBytes() {
         java.lang.Object ref = path_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           path_ = b;
@@ -9063,7 +9244,7 @@ public final class Protocol {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -9079,7 +9260,7 @@ public final class Protocol {
         getPathBytes() {
       java.lang.Object ref = path_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         path_ = b;
@@ -9351,7 +9532,7 @@ public final class Protocol {
           getPathBytes() {
         java.lang.Object ref = path_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           path_ = b;

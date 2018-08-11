@@ -24,17 +24,15 @@ import alluxio.util.io.BufferUtils;
 import alluxio.util.network.NetworkAddressUtils;
 import alluxio.worker.block.io.BlockReader;
 import alluxio.worker.block.io.BlockWriter;
-
 import com.codahale.metrics.Counter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.ThreadSafe;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-
-import javax.annotation.concurrent.ThreadSafe;
 
 /**
  * Handles client requests to asynchronously cache blocks. Responsible for managing the local
@@ -103,7 +101,7 @@ public class AsyncCacheRequestManager {
             InetSocketAddress sourceAddress =
                 new InetSocketAddress(request.getSourceHost(), request.getSourcePort());
             result = cacheBlockFromRemoteWorker(
-                    blockId, blockLength, sourceAddress, openUfsBlockOptions);
+                    blockId, blockLength, sourceAddress, openUfsBlockOptions,request.getCacheTier());
           }
           LOG.debug("Result of async caching block {}: {}", blockId, result);
         } catch (Exception e) {
@@ -136,7 +134,7 @@ public class AsyncCacheRequestManager {
    * @return if the block is cached
    */
   private boolean cacheBlockFromUfs(long blockId, long blockSize,
-      Protocol.OpenUfsBlockOptions openUfsBlockOptions) {
+      Protocol.OpenUfsBlockOptions openUfsBlockOptions,int cacheTier) {
     // Check if the block has been requested in UFS block store
     try {
       if (!mBlockWorker
@@ -185,10 +183,10 @@ public class AsyncCacheRequestManager {
    * @return if the block is cached
    */
   private boolean cacheBlockFromRemoteWorker(long blockId, long blockSize,
-      InetSocketAddress sourceAddress, Protocol.OpenUfsBlockOptions openUfsBlockOptions) {
+      InetSocketAddress sourceAddress, Protocol.OpenUfsBlockOptions openUfsBlockOptions,int cacheTier) {
     try {
       mBlockWorker.createBlockRemote(Sessions.ASYNC_CACHE_SESSION_ID, blockId,
-          mStorageTierAssoc.getAlias(0), blockSize);
+          mStorageTierAssoc.getAlias(cacheTier), blockSize);
     } catch (BlockAlreadyExistsException e) {
       // It is already cached
       return true;

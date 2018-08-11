@@ -93,6 +93,7 @@ public final class InStreamOptions {
         Protocol.OpenUfsBlockOptions.newBuilder().setUfsPath(mStatus.getUfsPath())
             .setOffsetInFile(blockStart).setBlockSize(info.getLength())
             .setMaxUfsReadConcurrency(mOptions.getMaxUfsReadConcurrency())
+                .setCacheTier(mOptions.getCacheTier())
             .setNoCache(!mOptions.getReadType().isCache()).setMountId(mStatus.getMountId()).build();
     return openUfsBlockOptions;
   }

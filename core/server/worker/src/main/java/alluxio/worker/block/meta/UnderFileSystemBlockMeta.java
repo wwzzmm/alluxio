@@ -28,6 +28,8 @@ public final class UnderFileSystemBlockMeta {
   private final long mMountId;
   /** Do not cache the block to the local Alluxio worker if set. */
   private final boolean mNoCache;
+  /** Cache the block to the dst tier of local Alluxio worker . */
+  private final int mCacheTier;
   private final String mUser;
 
   /**
@@ -47,6 +49,7 @@ public final class UnderFileSystemBlockMeta {
     mMountId = options.getMountId();
     mNoCache = options.getNoCache();
     mUser = options.getUser();
+    mCacheTier = options.getCacheTier();
   }
 
   /**
@@ -103,5 +106,12 @@ public final class UnderFileSystemBlockMeta {
    */
   public String getUser() {
     return mUser;
+  }
+
+  /**
+   * @return the cacheTier
+   */
+  public int getCacheTier(){
+    return mCacheTier;
   }
 }

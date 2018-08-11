@@ -31,18 +31,16 @@ import alluxio.util.network.NetworkAddressUtils;
 import alluxio.worker.block.io.BlockReader;
 import alluxio.worker.block.io.BlockWriter;
 import alluxio.worker.block.meta.UnderFileSystemBlockMeta;
-
 import com.google.common.base.Preconditions;
 import io.netty.buffer.ByteBuf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
-
-import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * This class implements a {@link BlockReader} to read a block directly from UFS, and
@@ -68,6 +66,8 @@ public final class UnderFileSystemBlockReader implements BlockReader {
   private AlluxioURI mUfsMountPointUri;
   /** The block writer to write the block to Alluxio. */
   private BlockWriter mBlockWriter;
+  /** cache tier */
+  private final int mCacheTier;
   /** If set, the reader is closed and should not be used afterwards. */
   private boolean mClosed;
   /** The manager for different ufs. */
@@ -124,6 +124,7 @@ public final class UnderFileSystemBlockReader implements BlockReader {
     UfsManager.UfsClient ufsClient = mUfsManager.get(mBlockMeta.getMountId());
     mUfsResource = ufsClient.acquireUfsResource();
     mUfsMountPointUri = ufsClient.getUfsMountPointUri();
+    mCacheTier = mBlockMeta.getCacheTier();
   }
 
   /**
@@ -345,7 +346,7 @@ public final class UnderFileSystemBlockReader implements BlockReader {
     }
     try {
       if (mBlockWriter == null && offset == 0 && !mBlockMeta.isNoCache()) {
-        BlockStoreLocation loc = BlockStoreLocation.anyDirInTier(mStorageTierAssoc.getAlias(0));
+        BlockStoreLocation loc = BlockStoreLocation.anyDirInTier(mStorageTierAssoc.getAlias(mCacheTier));
         mLocalBlockStore.createBlock(mBlockMeta.getSessionId(), mBlockMeta.getBlockId(), loc,
             mInitialBlockSize);
         mBlockWriter = mLocalBlockStore.getBlockWriter(
