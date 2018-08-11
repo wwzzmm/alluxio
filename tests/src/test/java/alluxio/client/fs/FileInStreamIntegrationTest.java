@@ -433,7 +433,7 @@ public final class FileInStreamIntegrationTest extends BaseIntegrationTest {
     }
   }
 
-  @Test(timeout = 10000)
+  @Test(timeout = 1000)
   public void asyncCacheFirstBlock() throws Exception {
     String filename = mTestPath + "/file_" + MAX_LEN + "_" + mWriteUnderStore.hashCode();
     AlluxioURI uri = new AlluxioURI(filename);
