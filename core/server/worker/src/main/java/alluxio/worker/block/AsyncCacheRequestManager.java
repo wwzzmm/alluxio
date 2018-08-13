@@ -134,7 +134,7 @@ public class AsyncCacheRequestManager {
    * @return if the block is cached
    */
   private boolean cacheBlockFromUfs(long blockId, long blockSize,
-      Protocol.OpenUfsBlockOptions openUfsBlockOptions,int cacheTier) {
+      Protocol.OpenUfsBlockOptions openUfsBlockOptions) {
     // Check if the block has been requested in UFS block store
     try {
       if (!mBlockWorker
