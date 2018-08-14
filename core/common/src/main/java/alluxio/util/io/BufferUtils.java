@@ -415,7 +415,13 @@ public final class BufferUtils {
     }
     return ret;
   }
-
+  /**
+   * Gets an increasing sequence of bytes starting with the given value.
+   *
+   * @param start the starting value to use
+   * @param len the target length of the sequence
+   * @return an increasing sequence of bytes
+   */
   public static byte[] getIncreasingBoolByteArray(int start, int len) {
     byte[] ret = new byte[len];
     for (int k = 0; k < len; k++) {
