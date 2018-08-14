@@ -954,6 +954,7 @@
                 <exclude>org.apache.curator</exclude>
                 <exclude>org.apache.zookeeper</exclude>
                 <exclude>javax.servlet</exclude>
+                <exclude>org.glassfish:javax.servlet</exclude>
               </excludes>
             </artifactSet>
           </configuration>
