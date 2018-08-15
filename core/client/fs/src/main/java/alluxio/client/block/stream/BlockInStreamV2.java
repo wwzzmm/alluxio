@@ -469,4 +469,9 @@ public class BlockInStreamV2 extends BlockInStream implements Input {
     mBuffer.get(bytes);
     mBuffer.position(tPos);
   }
+
+  @Override
+  public ByteBuffer getByteBuffer() {
+    return mBuffer;
+  }
 }

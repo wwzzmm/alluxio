@@ -56,10 +56,8 @@ public class BlockInStreamV1024 extends BlockInStream implements Input {
   /**
    * Creates an instance of {@link BlockInStreamV1024}.
    *
-   * @param address the address of the netty data server
-   * @param blockSource the source location of the block
-   * @param id the ID (either block ID or UFS file ID)
    * @param length the length
+   * @param path the path
    */
   protected BlockInStreamV1024(long length, String path) throws IOException {
     super(null, null, null, 0, 0);
@@ -82,10 +80,8 @@ public class BlockInStreamV1024 extends BlockInStream implements Input {
    * 5. UFS Read from worker - if the data source is UFS, read from the UFS policy's designated
    * worker (ufs -> local or remote worker -> client)
    *
-   * @param context the file system context
    * @param info the block info
    * @param dataSource the Alluxio worker which should read the data
-   * @param dataSourceType the source location of the block
    * @param options the instream options
    * @return the {@link BlockInStreamV1024} object
    */
@@ -121,10 +117,8 @@ public class BlockInStreamV1024 extends BlockInStream implements Input {
   /**
    * Creates a {@link BlockInStreamV1024} to read from a local file.
    *
-   * @param address the network address of the netty data server to read from
-   * @param blockId the block ID
    * @param length the block length
-   * @param options the in stream options
+   * @param path the block path
    * @return the {@link BlockInStreamV1024} created
    */
   private static BlockInStreamV1024 createLocalBlockInStream(long length,
@@ -419,5 +413,10 @@ public class BlockInStreamV1024 extends BlockInStream implements Input {
     mBuffer.position(pos);
     mBuffer.get(bytes);
     mBuffer.position(tPos);
+  }
+
+  @Override
+  public ByteBuffer getByteBuffer() {
+    return mBuffer;
   }
 }

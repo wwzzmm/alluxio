@@ -13,6 +13,7 @@ package alluxio.client.file;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * input interface instead of {@link java.io.InputStream}
@@ -128,4 +129,6 @@ public interface Input extends Closeable {
   String readString(int pos) throws IOException;
 
   void readBytes(byte[] bytes, int pos) throws IOException;
+
+  ByteBuffer getByteBuffer();
 }
