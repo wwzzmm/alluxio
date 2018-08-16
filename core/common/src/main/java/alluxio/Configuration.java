@@ -382,8 +382,9 @@ public final class Configuration {
    *
    * @throws IllegalStateException if invalid configuration is encountered
    */
-  public static void validate() {
+  public static boolean validate() {
     CONF.validate();
+    return true;
   }
 
   /**

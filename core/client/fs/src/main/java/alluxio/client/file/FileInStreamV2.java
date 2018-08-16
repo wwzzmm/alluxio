@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -325,4 +326,10 @@ public class FileInStreamV2 extends FileInStream {
   public void readBytes(byte[] bytes, int pos) throws IOException {
     input.readBytes(bytes, pos);
   }
+
+  @Override
+  public ByteBuffer getByteBuffer() {
+    return input.getByteBuffer();
+  }
+
 }
