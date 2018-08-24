@@ -409,10 +409,10 @@ public class BlockInStreamV1024 extends BlockInStream implements Input {
     if (mClosed) {
       Preconditions.checkState(!mClosed, PreconditionMessage.ERR_CLOSED_BLOCK_IN_STREAM);
     }
-    int tPos = mBuffer.position();
-    mBuffer.position(pos);
-    mBuffer.get(bytes);
-    mBuffer.position(tPos);
+    int length = bytes.length;
+    for(int i = 0 ; i < length ; i++){
+      bytes[i] = mBuffer.get(pos + 1);
+    }
   }
 
   @Override
