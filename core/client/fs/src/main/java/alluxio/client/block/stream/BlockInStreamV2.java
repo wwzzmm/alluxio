@@ -466,7 +466,7 @@ public class BlockInStreamV2 extends BlockInStream implements Input {
     }
     int length = bytes.length;
     for(int i = 0 ; i < length ; i++){
-      bytes[i] = mBuffer.get(pos + 1);
+      bytes[i] = mBuffer.get(pos + i);
     }
   }
 
