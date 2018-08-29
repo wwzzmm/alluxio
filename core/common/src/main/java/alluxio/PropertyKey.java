@@ -335,6 +335,20 @@ public final class PropertyKey implements Comparable<PropertyKey> {
           .setIgnoredSiteProperty(true)
           .setConsistencyCheckLevel(ConsistencyCheckLevel.WARN)
           .build();
+  public static final PropertyKey SPARK_LOGS_DIR =
+          new Builder(Name.SPARK_LOGS_DIR)
+                  .setDefaultValue(String.format("${%s}/logs", Name.WORK_DIR))
+                  .setDescription("The path of spark log files.")
+                  .setIgnoredSiteProperty(true)
+                  .setConsistencyCheckLevel(ConsistencyCheckLevel.WARN)
+                  .build();
+  public static final PropertyKey HDFS_LOGS_DIR =
+          new Builder(Name.HDFS_LOGS_DIR)
+                  .setDefaultValue(String.format("${%s}/logs", Name.WORK_DIR))
+                  .setDescription("The path of hdfs log files.")
+                  .setIgnoredSiteProperty(true)
+                  .setConsistencyCheckLevel(ConsistencyCheckLevel.WARN)
+                  .build();
   public static final PropertyKey METRICS_CONF_FILE =
       new Builder(Name.METRICS_CONF_FILE)
           .setDefaultValue(String.format("${%s}/metrics.properties", Name.CONF_DIR))
@@ -412,7 +426,7 @@ public final class PropertyKey implements Comparable<PropertyKey> {
           .build();
   public static final PropertyKey WEB_RESOURCES =
       new Builder(Name.WEB_RESOURCES)
-          .setDefaultValue(String.format("${%s}/core/server/common/src/main/webapp", Name.HOME))
+          .setDefaultValue(String.format("${%s}/assembly/webapp.war", Name.HOME))
           .setDescription("Path to the web application resources.")
           .setConsistencyCheckLevel(ConsistencyCheckLevel.WARN)
           .setScope(Scope.SERVER)
@@ -3107,6 +3121,8 @@ public final class PropertyKey implements Comparable<PropertyKey> {
         "alluxio.keyvalue.partition.size.bytes.max";
     public static final String LOGGER_TYPE = "alluxio.logger.type";
     public static final String LOGS_DIR = "alluxio.logs.dir";
+    public static final String SPARK_LOGS_DIR = "alluxio.spark.logs.dir";
+    public static final String HDFS_LOGS_DIR = "alluxio.hdfs.logs.dir";
     public static final String METRICS_CONF_FILE = "alluxio.metrics.conf.file";
     public static final String NETWORK_HOST_RESOLUTION_TIMEOUT_MS =
         "alluxio.network.host.resolution.timeout";

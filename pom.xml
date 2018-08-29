@@ -948,15 +948,6 @@
           <!-- Needs to be 2.4.2 or later to prevent MSHADE-148 -->
           <version>2.4.3</version>
           <configuration>
-            <artifactSet>
-              <excludes>
-                <exclude>io.netty:netty-all</exclude>
-                <exclude>org.apache.curator</exclude>
-                <exclude>org.apache.zookeeper</exclude>
-                <exclude>javax.servlet</exclude>
-                <exclude>org.glassfish:javax.servlet</exclude>
-              </excludes>
-            </artifactSet>
           </configuration>
         </plugin>
         <plugin>

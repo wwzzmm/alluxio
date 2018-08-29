@@ -17,13 +17,15 @@ import alluxio.PropertyKey;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import javax.annotation.concurrent.ThreadSafe;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -42,10 +44,15 @@ public final class WebInterfaceBrowseLogsServlet extends HttpServlet {
   private static final FilenameFilter LOG_FILE_FILTER = new FilenameFilter() {
     @Override
     public boolean accept(File dir, String name) {
-      return name.toLowerCase().endsWith(".log");
+      return name.toLowerCase().contains(".log") || name.toLowerCase().contains(".out");
     }
   };
-
+  private static final FilenameFilter SPARK_FILE_FILTER = new FilenameFilter() {
+    @Override
+    public boolean accept(File dir, String name) {
+      return name.toLowerCase().contains("std");
+    }
+  };
   /**
    * Creates a new instance of {@link WebInterfaceBrowseLogsServlet}.
    *
@@ -55,6 +62,22 @@ public final class WebInterfaceBrowseLogsServlet extends HttpServlet {
     String prefix = isMasterServlet ? "/" : "/worker/";
     mBrowseJsp = prefix + "browse.jsp";
     mViewJsp = prefix + "viewFile.jsp";
+    String logsPath = Configuration.get(PropertyKey.LOGS_DIR);
+    String logName = logsPath + File.separator + "all_logs.tar.gz";
+    if(!new File(logName).exists()) {
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter(logName, "UTF-8");
+            writer.println("Download file using 'download' link bellow!");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } finally {
+            writer.close();
+        }
+    }
+
   }
 
   /**
@@ -117,7 +140,7 @@ public final class WebInterfaceBrowseLogsServlet extends HttpServlet {
     String requestFile = request.getParameter("path");
 
     if (requestFile == null || requestFile.isEmpty()) {
-      // List all log files in the log/ directory.
+      //1. List all log files in the alluxio log/ directory.
 
       List<UIFileInfo> fileInfos = new ArrayList<>();
       File[] logFiles = logsDir.listFiles(LOG_FILE_FILTER);
@@ -129,6 +152,50 @@ public final class WebInterfaceBrowseLogsServlet extends HttpServlet {
                   logFile.lastModified(), logFile.isDirectory())));
         }
       }
+      // 2.List all log files in the hdfs log/ directory.
+//      logsPath = Configuration.get(PropertyKey.HDFS_LOGS_DIR);
+//      logsDir = new File(logsPath);
+//      File[] hdfsLogFiles = logsDir.listFiles(LOG_FILE_FILTER);
+//      if (hdfsLogFiles != null) {
+//        for (File logFile : hdfsLogFiles) {
+//          String logFileName = logFile.getPath();
+//          fileInfos.add(new UIFileInfo(new UIFileInfo.LocalFileInfo(logFileName, logFileName,
+//                  logFile.length(), UIFileInfo.LocalFileInfo.EMPTY_CREATION_TIME,
+//                  logFile.lastModified(), logFile.isDirectory())));
+//        }
+//      }
+      // 3.List all log files in the spark work log/ directory.
+//      display only newest but download all
+//      logsPath = Configuration.get(PropertyKey.SPARK_LOGS_DIR);
+//      logsDir = new File(logsPath);
+//      File[] sparkLogFiles = logsDir.listFiles();
+//      if (sparkLogFiles != null) {
+//        for (File logFile : sparkLogFiles) {
+//          if (logFile.isDirectory()) {
+//            File[] innerLogs = logFile.listFiles(SPARK_FILE_FILTER);
+//            for (File iLogFile : innerLogs) {
+//              String logFileName = iLogFile.getPath();
+//              fileInfos.add(new UIFileInfo(new UIFileInfo.LocalFileInfo(logFileName, logFileName,
+//                      iLogFile.length(), UIFileInfo.LocalFileInfo.EMPTY_CREATION_TIME,
+//                      iLogFile.lastModified(), iLogFile.isDirectory())));
+//            }
+//          }else{
+//            String logFileName = logFile.getPath();
+//            fileInfos.add(new UIFileInfo(new UIFileInfo.LocalFileInfo(logFileName, logFileName,
+//                    logFile.length(), UIFileInfo.LocalFileInfo.EMPTY_CREATION_TIME,
+//                    logFile.lastModified(), logFile.isDirectory())));
+//          }
+//        }
+//      }
+
+//      4.put an empty all-log.tar.gz fileinfo form download
+        logsPath = Configuration.get(PropertyKey.LOGS_DIR);
+        File logFile = new File(logsPath + File.separator +"all_logs.tar.gz");
+
+        fileInfos.add(new UIFileInfo(new UIFileInfo.LocalFileInfo(logFile.getName(), logFile.getName(),
+                logFile.length(), UIFileInfo.LocalFileInfo.EMPTY_CREATION_TIME,
+                logFile.lastModified(), logFile.isDirectory())));
+
       Collections.sort(fileInfos, UIFileInfo.PATH_STRING_COMPARE);
       request.setAttribute("nTotalFile", fileInfos.size());
 
@@ -164,10 +231,12 @@ public final class WebInterfaceBrowseLogsServlet extends HttpServlet {
       // Request a specific log file.
 
       // Only allow filenames as the path, to avoid arbitrary local path lookups.
+      logsPath = Configuration.get(PropertyKey.LOGS_DIR);
+      logsDir = new File(logsPath);
       requestFile = new File(requestFile).getName();
       request.setAttribute("currentPath", requestFile);
 
-      File logFile = new File(logsDir, requestFile);
+      File logFile = new File(logsDir ,requestFile);
 
       try {
         long fileSize = logFile.length();

@@ -15,6 +15,7 @@ import alluxio.AlluxioURI;
 import alluxio.Configuration;
 import alluxio.PropertyKey;
 
+import alluxio.util.network.NetworkAddressUtils;
 import com.google.common.io.ByteStreams;
 
 import java.io.File;
@@ -22,6 +23,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.function.Function;
 
 import javax.annotation.concurrent.ThreadSafe;
 import javax.servlet.ServletException;
@@ -36,7 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 @ThreadSafe
 public final class WebInterfaceDownloadLocalServlet extends HttpServlet {
   private static final long serialVersionUID = 7260819317567193560L;
-
+  private static final Function<String, Boolean> filter = s -> !s.contains("jar") && !s.contains("tar.gz");
   /**
    * Creates a new instance of {@link WebInterfaceDownloadLocalServlet}.
    */
@@ -62,7 +64,7 @@ public final class WebInterfaceDownloadLocalServlet extends HttpServlet {
 
     // Only allow filenames as the path, to avoid downloading arbitrary local files.
     requestPath = new File(requestPath).getName();
-    File logFile = new File(logsDir, requestPath);
+    File logFile = new File(logsDir ,requestPath);
     try {
       downloadLogFile(logFile, request, response);
     } catch (FileNotFoundException e) {
@@ -84,6 +86,10 @@ public final class WebInterfaceDownloadLocalServlet extends HttpServlet {
    */
   private void downloadLogFile(File file, HttpServletRequest request, HttpServletResponse response)
       throws IOException {
+    if(file.getName().contains("all_logs.tar.gz")){
+      createAllLogTar(getTarFileName("/tmp/all_logs"));
+      file = new File(getTarFileName("/tmp/all_logs"));
+    }
     long len = file.length();
     String fileName = file.getName();
     response.setContentType("application/octet-stream");
@@ -106,5 +112,17 @@ public final class WebInterfaceDownloadLocalServlet extends HttpServlet {
         }
       }
     }
+  }
+  private void createAllLogTar(String targetTar){
+    String tmpTarPath = targetTar;
+    String logsPath = Configuration.get(PropertyKey.LOGS_DIR);
+    String hdfsLogsPath = Configuration.get(PropertyKey.HDFS_LOGS_DIR);
+    String sparkLogsPath = Configuration.get(PropertyKey.SPARK_LOGS_DIR);
+    TarGZIPUtils.createTarFile(tmpTarPath,filter,logsPath,hdfsLogsPath,sparkLogsPath);
+  }
+
+  private String getTarFileName(String tarName){
+    return tarName != null ? tarName.concat("-"+NetworkAddressUtils.getLocalHostMetricName()).concat(".tar.gz")
+            : "all-logs".concat("-"+NetworkAddressUtils.getLocalHostMetricName()).concat(".tar.gz");
   }
 }
