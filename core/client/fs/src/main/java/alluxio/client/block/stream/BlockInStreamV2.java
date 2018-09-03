@@ -452,10 +452,7 @@ public class BlockInStreamV2 extends BlockInStream implements Input {
     }
     int size = mBuffer.getInt(pos);
     byte[] bytes = new byte[size];
-    int tPos = mBuffer.position();
-    mBuffer.position(pos + 4);
-    mBuffer.get(bytes);
-    mBuffer.position(tPos);
+    readBytes(bytes,pos + 4 );
     return toString(bytes);
   }
 
