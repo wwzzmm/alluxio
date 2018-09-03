@@ -95,6 +95,15 @@
                   </excludes>
                 </filter>
               </filters>
+              <artifactSet>
+                <excludes>
+                  <exclude>io.netty:netty-all</exclude>
+                  <exclude>org.apache.curator</exclude>
+                  <exclude>org.apache.zookeeper</exclude>
+                  <exclude>javax.servlet</exclude>
+                  <exclude>org.glassfish:javax.servlet</exclude>
+                </excludes>
+              </artifactSet>
             </configuration>
           </execution>
         </executions>
