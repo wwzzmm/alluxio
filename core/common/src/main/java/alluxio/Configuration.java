@@ -380,6 +380,7 @@ public final class Configuration {
   /**
    * Validates the configuration.
    *
+   * @return true
    * @throws IllegalStateException if invalid configuration is encountered
    */
   public static boolean validate() {

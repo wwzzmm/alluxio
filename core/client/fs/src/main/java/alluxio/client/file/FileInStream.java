@@ -702,59 +702,59 @@ public class FileInStream extends InputStream implements BoundedStream, Position
 
 
   @Override
-  public int readByte(int pos) throws IOException {
+  public int readByte(long pos) throws IOException {
     throw new UnsupportedOperationException();
 
   }
 
   @Override
-  public boolean readBool(int pos) throws IOException {
+  public boolean readBool(long pos) throws IOException {
     throw new UnsupportedOperationException();
 
   }
 
   @Override
-  public int readShort(int pos) throws IOException {
+  public int readShort(long pos) throws IOException {
     throw new UnsupportedOperationException();
 
   }
 
   @Override
-  public int readInt(int pos) throws IOException {
+  public int readInt(long pos) throws IOException {
     throw new UnsupportedOperationException();
 
   }
 
   @Override
-  public float readFloat(int pos) throws IOException {
+  public float readFloat(long pos) throws IOException {
     throw new UnsupportedOperationException();
 
   }
 
   @Override
-  public long readLong(int pos) throws IOException {
+  public long readLong(long pos) throws IOException {
     throw new UnsupportedOperationException();
 
   }
 
   @Override
-  public double readDouble(int pos) throws IOException {
+  public double readDouble(long pos) throws IOException {
     throw new UnsupportedOperationException();
 
   }
 
   @Override
-  public String readString(int pos) throws IOException {
+  public String readString(long pos) throws IOException {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public void readBytes(byte[] bytes, int pos) throws IOException {
+  public void readBytes(byte[] bytes, long pos) throws IOException {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public ByteBuffer getByteBuffer() {
+  public ByteBuffer[] getByteBuffers() {
     throw new UnsupportedOperationException();
   }
 

@@ -328,59 +328,59 @@ public class BlockInStreamV1024 extends BlockInStream implements Input {
   }
 
   @Override
-  public int readByte(int pos) throws IOException {
+  public int readByte(long pos) throws IOException {
     if (mClosed) {
       Preconditions.checkState(!mClosed, PreconditionMessage.ERR_CLOSED_BLOCK_IN_STREAM);
     }
-    return mBuffer.get(pos) & 0xFF;
+    return mBuffer.get((int) pos) & 0xFF;
   }
 
   @Override
-  public boolean readBool(int pos) throws IOException {
+  public boolean readBool(long pos) throws IOException {
     if (mClosed) {
       Preconditions.checkState(!mClosed, PreconditionMessage.ERR_CLOSED_BLOCK_IN_STREAM);
     }
-    return mBuffer.get(pos) == 1;
+    return mBuffer.get((int) pos) == 1;
   }
 
   @Override
-  public int readShort(int pos) throws IOException {
+  public int readShort(long pos) throws IOException {
     if (mClosed) {
       Preconditions.checkState(!mClosed, PreconditionMessage.ERR_CLOSED_BLOCK_IN_STREAM);
     }
-    return mBuffer.getShort(pos) & 0xffff;
+    return mBuffer.getShort((int) pos) & 0xffff;
   }
 
   @Override
-  public int readInt(int pos) throws IOException {
+  public int readInt(long pos) throws IOException {
     if (mClosed) {
       Preconditions.checkState(!mClosed, PreconditionMessage.ERR_CLOSED_BLOCK_IN_STREAM);
     }
-    return mBuffer.getInt(pos);
+    return mBuffer.getInt((int) pos);
   }
 
   @Override
-  public float readFloat(int pos) throws IOException {
+  public float readFloat(long pos) throws IOException {
     if (mClosed) {
       Preconditions.checkState(!mClosed, PreconditionMessage.ERR_CLOSED_BLOCK_IN_STREAM);
     }
-    return mBuffer.getFloat(pos);
+    return mBuffer.getFloat((int) pos);
   }
 
   @Override
-  public long readLong(int pos) throws IOException {
+  public long readLong(long pos) throws IOException {
     if (mClosed) {
       Preconditions.checkState(!mClosed, PreconditionMessage.ERR_CLOSED_BLOCK_IN_STREAM);
     }
-    return mBuffer.getLong(pos);
+    return mBuffer.getLong((int) pos);
   }
 
   @Override
-  public double readDouble(int pos) throws IOException {
+  public double readDouble(long pos) throws IOException {
     if (mClosed) {
       Preconditions.checkState(!mClosed, PreconditionMessage.ERR_CLOSED_BLOCK_IN_STREAM);
     }
-    return mBuffer.getDouble(pos);
+    return mBuffer.getDouble((int) pos);
   }
 
   /**
@@ -391,29 +391,29 @@ public class BlockInStreamV1024 extends BlockInStream implements Input {
   }
 
   @Override
-  public String readString(int pos) throws IOException {
+  public String readString(long pos) throws IOException {
     if (mClosed) {
       Preconditions.checkState(!mClosed, PreconditionMessage.ERR_CLOSED_BLOCK_IN_STREAM);
     }
-    int size = mBuffer.getInt(pos);
+    int size = mBuffer.getInt((int) pos);
     byte[] bytes = new byte[size];
     readBytes(bytes,pos + 4 );
     return toString(bytes);
   }
 
   @Override
-  public void readBytes(byte[] bytes, int pos) throws IOException {
+  public void readBytes(byte[] bytes, long pos) throws IOException {
     if (mClosed) {
       Preconditions.checkState(!mClosed, PreconditionMessage.ERR_CLOSED_BLOCK_IN_STREAM);
     }
     int length = bytes.length;
     for(int i = 0 ; i < length ; i++){
-      bytes[i] = mBuffer.get(pos + i);
+      bytes[i] = mBuffer.get((int) (pos + i));
     }
   }
 
   @Override
-  public ByteBuffer getByteBuffer() {
-    return mBuffer;
+  public ByteBuffer[] getByteBuffers() {
+    return new ByteBuffer[] {mBuffer};
   }
 }

@@ -33,6 +33,8 @@ import java.util.List;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({FileSystemContext.class, AlluxioBlockStore.class, UnderFileSystem.class})
 public class Input4StringV2Test extends Input4BaseV2Test {
+  protected long UNIT_LENGTH = 50L;
+
   @Override
   protected byte[] data(int i) {
     return BufferUtils

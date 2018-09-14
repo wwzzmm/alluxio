@@ -282,54 +282,54 @@ public class FileInStreamV2 extends FileInStream {
 
 
   @Override
-  public int readByte(int pos) throws IOException {
+  public int readByte(long pos) throws IOException {
     return input.readByte(pos);
   }
 
   @Override
-  public boolean readBool(int pos) throws IOException {
+  public boolean readBool(long pos) throws IOException {
     return input.readBool(pos);
   }
 
   @Override
-  public int readShort(int pos) throws IOException {
+  public int readShort(long pos) throws IOException {
     return input.readShort(pos);
   }
 
   @Override
-  public int readInt(int pos) throws IOException {
+  public int readInt(long pos) throws IOException {
     return input.readInt(pos);
   }
 
   @Override
-  public float readFloat(int pos) throws IOException {
+  public float readFloat(long pos) throws IOException {
     return input.readFloat(pos);
   }
 
   @Override
-  public long readLong(int pos) throws IOException {
+  public long readLong(long pos) throws IOException {
     return input.readLong(pos);
 
   }
 
   @Override
-  public double readDouble(int pos) throws IOException {
+  public double readDouble(long pos) throws IOException {
     return input.readDouble(pos);
   }
 
   @Override
-  public String readString(int pos) throws IOException {
+  public String readString(long pos) throws IOException {
     return input.readString(pos);
   }
 
   @Override
-  public void readBytes(byte[] bytes, int pos) throws IOException {
+  public void readBytes(byte[] bytes, long pos) throws IOException {
     input.readBytes(bytes, pos);
   }
 
   @Override
-  public ByteBuffer getByteBuffer() {
-    return input.getByteBuffer();
+  public ByteBuffer[] getByteBuffers() {
+    return input.getByteBuffers();
   }
 
 }

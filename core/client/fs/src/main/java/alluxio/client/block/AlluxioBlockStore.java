@@ -14,12 +14,15 @@ package alluxio.client.block;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
+import alluxio.Configuration;
 import alluxio.Constants;
+import alluxio.PropertyKey;
 import alluxio.client.block.policy.BlockLocationPolicy;
 import alluxio.client.block.policy.options.GetWorkerOptions;
 import alluxio.client.block.stream.BlockInStream;
 import alluxio.client.block.stream.BlockInStream.BlockInStreamSource;
 import alluxio.client.block.stream.BlockInStreamV2;
+import alluxio.client.block.stream.BlockInStreamV2MultiMap;
 import alluxio.client.block.stream.BlockOutStream;
 import alluxio.client.file.FileSystemContext;
 import alluxio.client.file.options.InStreamOptions;
@@ -64,6 +67,7 @@ public final class AlluxioBlockStore {
 
   private final FileSystemContext mContext;
   private final TieredIdentity mTieredIdentity;
+  private final long maxMapSize = Configuration.getLong(PropertyKey.USER_FILE_MAX_MMAP_BYTES);
 
   /**
    * Creates an Alluxio block store with default file system context and default local hostname.
@@ -227,7 +231,11 @@ public final class AlluxioBlockStore {
     }
 //    return BlockInStream.create(mContext, info, dataSource, dataSourceType, options);
     if (options.getOptions().getVersion() == 2) {
-      return BlockInStreamV2.create(mContext, info, dataSource, options);
+      if(options.getStatus().getLength() <= maxMapSize) {
+        return BlockInStreamV2.create(mContext, info, dataSource, options);
+      }else{
+        return BlockInStreamV2MultiMap.create(mContext, info, dataSource, options);
+      }
     } else {
       return BlockInStream.create(mContext, info, dataSource, dataSourceType, options);
 

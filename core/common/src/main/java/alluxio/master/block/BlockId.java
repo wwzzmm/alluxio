@@ -47,7 +47,8 @@ public final class BlockId {
     // TODO(gene): Check for valid IDs here?
     long blockId = ((containerId & CONTAINER_ID_MASK) << SEQUENCE_NUMBER_BITS)
             | (sequenceNumber & SEQUENCE_NUMBER_MASK);
-    LOG.info("createBlockId : containerId= {},sequenceNumber= {},blockId={}",containerId,sequenceNumber,blockId);
+    LOG.debug("createBlockId : containerId= {}, sequenceNumber= {}, blockId={}",
+            containerId, sequenceNumber, blockId);
     return blockId;
   }
 

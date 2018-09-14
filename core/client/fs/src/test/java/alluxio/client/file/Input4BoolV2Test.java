@@ -21,6 +21,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -29,12 +30,12 @@ import java.io.IOException;
 /**
  * Tests for the {@link FileInStreamV2}; class.
  */
-@RunWith(PowerMockRunner.class)
+//@RunWith(PowerMockRunner.class)
 @PrepareForTest({FileSystemContext.class, AlluxioBlockStore.class, UnderFileSystem.class})
 public class Input4BoolV2Test extends Input4BaseV2Test {
 
-  private long
-  getBlockLength(int streamId) {
+
+  private long getBlockLength(int streamId) {
     return streamId == NUM_STREAMS - 1 ? 50 : STEP_LENGTH;
   }
 

@@ -2356,14 +2356,13 @@ public final class PropertyKey implements Comparable<PropertyKey> {
                   .setDescription("it is for the blockInStream map size ")
                   .build();
 
-
-  public static final PropertyKey USER_FILE_MAX_MMAP_BYTES=
+  public static final PropertyKey USER_FILE_MAX_MMAP_BYTES =
           new Builder(Name.USER_FILE_MAX_MMAP_BYTES)
                   .setDefaultValue(Integer.MAX_VALUE)
                   .setDescription("it is for the blockInStream max map size ")
                   .build();
 
-  public static final PropertyKey USER_FILE_IN_STREAM_CACHE_TIER=
+  public static final PropertyKey USER_FILE_IN_STREAM_CACHE_TIER =
           new Builder(Name.USER_FILE_IN_STREAM_CACHE_TIER)
                   .setDefaultValue(0)
                   .setDescription("it is for the cache tier ")
@@ -3594,7 +3593,8 @@ public final class PropertyKey implements Comparable<PropertyKey> {
     public static final String USER_FILE_MMAP_BYTES = "alluxio.user.file.mmap.bytes";
 
     public static final String USER_FILE_MAX_MMAP_BYTES = "alluxio.user.file.max.mmap.bytes";
-    public static final String USER_FILE_IN_STREAM_CACHE_TIER = "alluxio.user.local.fileinstream.cache_tier";
+    public static final String USER_FILE_IN_STREAM_CACHE_TIER =
+            "alluxio.user.local.fileinstream.cache_tier";
 
     //
     // FUSE integration related properties

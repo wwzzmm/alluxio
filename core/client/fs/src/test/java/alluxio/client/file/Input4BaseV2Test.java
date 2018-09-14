@@ -11,12 +11,15 @@
 
 package alluxio.client.file;
 
+import alluxio.Configuration;
+import alluxio.PropertyKey;
 import alluxio.client.ReadType;
 import alluxio.client.block.AlluxioBlockStore;
 import alluxio.client.block.BlockWorkerInfo;
 import alluxio.client.block.stream.BlockInStream;
 import alluxio.client.block.stream.BlockInStream.BlockInStreamSource;
 import alluxio.client.block.stream.TestBlockInStreamV2;
+import alluxio.client.block.stream.TestBlockInStreamV2Multi;
 import alluxio.client.file.options.InStreamOptions;
 import alluxio.client.file.options.OpenFileOptions;
 import alluxio.client.util.ClientTestUtils;
@@ -28,6 +31,7 @@ import alluxio.wire.FileInfo;
 import alluxio.wire.WorkerNetAddress;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -48,7 +52,8 @@ import static org.mockito.Matchers.any;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({FileSystemContext.class, AlluxioBlockStore.class, UnderFileSystem.class})
-public abstract class Input4BaseV2Test {
+@Ignore
+public class Input4BaseV2Test {
 
   protected static final long STEP_LENGTH = 100L;
   protected static final long UNIT_LENGTH = 350L;
@@ -58,7 +63,7 @@ public abstract class Input4BaseV2Test {
   protected FileSystemContext mContext;
   protected FileInfo mInfo;
   protected URIStatus mStatus;
-  protected List<TestBlockInStreamV2> mInStreams;
+  protected List<BlockInStream> mInStreams;
   protected FileInStream mTestStream;
   private BlockInStreamSource mBlockSource;
 
@@ -69,7 +74,9 @@ public abstract class Input4BaseV2Test {
     return "/tmp/alluxio/data/" + this.getClass().getName();
   }
 
-  protected abstract byte[] data(int v);
+  protected  byte[] data(int v){
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * Sets up the context and streams before a test runs.
@@ -79,6 +86,8 @@ public abstract class Input4BaseV2Test {
    */
   @Before
   public void before() throws Exception {
+    Configuration.set(PropertyKey.USER_FILE_MMAP_BYTES,233);
+
     mInfo = genFileInfo();
 
     ClientTestUtils.setSmallBufferSizes();
@@ -99,9 +108,9 @@ public abstract class Input4BaseV2Test {
       FileBlockInfo fbInfo = new FileBlockInfo().setBlockInfo(new BlockInfo().setBlockId(i));
       fileBlockInfos.add(fbInfo);
       final byte[] input = data(i);
-      TestBlockInStreamV2.write(dataPath(), input);
-      TestBlockInStreamV2.mPath = dataPath();
-      mInStreams.add(new TestBlockInStreamV2(i, input.length));
+      TestBlockInStreamV2Multi.write(dataPath(), input);
+      TestBlockInStreamV2Multi.mPath = dataPath();
+      mInStreams.add(new TestBlockInStreamV2Multi(i, input.length));
       Mockito.when(mBlockStore.getEligibleWorkers())
           .thenReturn(Arrays.asList(new BlockWorkerInfo(new WorkerNetAddress(), 0, 0)));
       Mockito.when(mBlockStore.getInStream(Mockito.eq((long) i), Mockito.any(InStreamOptions
@@ -110,8 +119,7 @@ public abstract class Input4BaseV2Test {
             @Override
             public BlockInStream answer(InvocationOnMock invocation) throws Throwable {
               long blockId = (Long) invocation.getArguments()[0];
-              return mInStreams.get((int) blockId).isClosed() ? new TestBlockInStreamV2(
-                  blockId, input.length) : mInStreams.get((int) blockId);
+              return  new TestBlockInStreamV2Multi(blockId, input.length) ;
             }
           });
     }
