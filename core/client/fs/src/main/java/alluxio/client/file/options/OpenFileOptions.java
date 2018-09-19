@@ -284,15 +284,9 @@ public final class OpenFileOptions {
   public OpenFileOptions setFileStreamVersion(int version){
     return setVersion(version);
   }
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 
   @Deprecated
   public int getFileStreamVersion() {
     return this.mVersion;
   }
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 }
