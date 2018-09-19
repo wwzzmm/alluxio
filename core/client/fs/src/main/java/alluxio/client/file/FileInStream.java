@@ -12,6 +12,7 @@
 package alluxio.client.file;
 
 import alluxio.Configuration;
+import alluxio.Constants;
 import alluxio.PropertyKey;
 import alluxio.Seekable;
 import alluxio.annotation.PublicApi;
@@ -23,22 +24,34 @@ import alluxio.client.block.stream.BlockInStream;
 import alluxio.client.file.options.InStreamOptions;
 import alluxio.client.file.options.OutStreamOptions;
 import alluxio.client.file.policy.FileWriteLocationPolicy;
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import alluxio.exception.*;
+=======
+=======
+>>>>>>> Stashed changes
+import alluxio.exception.BlockAlreadyExistsException;
+import alluxio.exception.BlockDoesNotExistException;
+import alluxio.exception.InvalidWorkerStateException;
+import alluxio.exception.PreconditionMessage;
+>>>>>>> Stashed changes
 import alluxio.exception.status.DeadlineExceededException;
 import alluxio.exception.status.UnavailableException;
-import alluxio.network.netty.NettyRPC;
-import alluxio.network.netty.NettyRPCContext;
-import alluxio.proto.dataserver.Protocol;
 import alluxio.retry.CountingRetry;
 import alluxio.util.CommonUtils;
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import alluxio.util.proto.ProtoMessage;
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
 import alluxio.wire.WorkerNetAddress;
-
 import com.google.common.base.Preconditions;
-import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -46,8 +59,6 @@ import java.net.ConnectException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * A streaming API to read a file. This API represents a file as a stream of bytes and provides a
@@ -110,6 +121,14 @@ public class FileInStream extends InputStream implements BoundedStream, Position
     mBlockStore = AlluxioBlockStore.create(context);
     mContext = context;
     mOutStreamOptions = OutStreamOptions.defaults().setWriteTier(Configuration.getInt(PropertyKey.USER_FILE_IN_STREAM_CACHE_TIER));
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
+=======
+
+>>>>>>> Stashed changes
     mLength = mStatus.getLength();
     mBlockSize = mStatus.getBlockSizeBytes();
     mLocationPolicy =  CommonUtils.createNewClassInstance(
@@ -129,8 +148,18 @@ public class FileInStream extends InputStream implements BoundedStream, Position
    */
   public static FileInStream create(URIStatus status, InStreamOptions options,
                                     FileSystemContext context) {
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
     if (status.getLength() == -1) {
       throw new UnsupportedOperationException("FileInStream not support unknown size file");
+=======
+    if (status.getLength() == Constants.UNKNOWN_SIZE) {
+      return new UnknownLengthFileInStream(status, options, context);
+>>>>>>> Stashed changes
+=======
+    if (status.getLength() == Constants.UNKNOWN_SIZE) {
+      return new UnknownLengthFileInStream(status, options, context);
+>>>>>>> Stashed changes
     }
     return new FileInStream(status, options, context);
   }
@@ -204,10 +233,23 @@ public class FileInStream extends InputStream implements BoundedStream, Position
       // exception.
       LOG.info(
               "The block with ID {} is already stored in the target worker, canceling the cache "
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
                       + "request.{}", getCurrentBlockId(),e);
     } else {
       LOG.warn("The block with ID {} could not be cached into Alluxio storage.{}",
               getCurrentBlockId(),e);
+=======
+=======
+>>>>>>> Stashed changes
+                      + "request.", getCurrentBlockId());
+    } else {
+      LOG.warn("The block with ID {} could not be cached into Alluxio storage.",
+              getCurrentBlockId());
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
     }
     closeOrCancelCacheStream();
   }
@@ -250,7 +292,17 @@ public class FileInStream extends InputStream implements BoundedStream, Position
    * @return the remaining bytes in the current block in stream
    */
   protected long inStreamRemaining() {
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
     return ((BoundedStream)mBlockInStream).remaining();
+=======
+    assert mBlockInStream instanceof BoundedStream;
+    return mBlockInStream.remaining();
+>>>>>>> Stashed changes
+=======
+    assert mBlockInStream instanceof BoundedStream;
+    return mBlockInStream.remaining();
+>>>>>>> Stashed changes
   }
   /**
    * Cancels the current cache out stream.
@@ -476,6 +528,7 @@ public class FileInStream extends InputStream implements BoundedStream, Position
     seek(mPosition + toSkip);
     return toSkip;
   }
+<<<<<<< Updated upstream
 
 
 
@@ -522,6 +575,122 @@ public class FileInStream extends InputStream implements BoundedStream, Position
       } finally {
         closeBlockInStream(stream);
       }
+<<<<<<< Updated upstream
+    }
+    if (lastException != null) {
+      throw lastException;
+    }
+    return lenCopy - len;
+  }
+
+  /* Seekable methods */
+  @Override
+  public long getPos() {
+    return mPosition;
+  }
+
+  @Override
+  public void seek(long pos) throws IOException {
+    if (mPosition == pos) {
+      return;
+    }
+=======
+    }
+    if (lastException != null) {
+      throw lastException;
+    }
+    return lenCopy - len;
+  }
+
+  /* Seekable methods */
+  @Override
+  public long getPos() {
+    return mPosition;
+  }
+
+  @Override
+  public void seek(long pos) throws IOException {
+    if (mPosition == pos) {
+      return;
+    }
+>>>>>>> Stashed changes
+    Preconditions.checkArgument(pos >= 0, PreconditionMessage.ERR_SEEK_NEGATIVE.toString(), pos);
+    Preconditions.checkArgument(pos <= mLength,
+        PreconditionMessage.ERR_SEEK_PAST_END_OF_FILE.toString(), pos,mLength);
+
+    if (mBlockInStream == null) { // no current stream open, advance position
+      mPosition = pos;
+      return;
+    }
+
+    long delta = pos - mPosition;
+    if (delta <= mBlockInStream.remaining() && delta >= -mBlockInStream.getPos()) { // within block
+      mBlockInStream.seek(mBlockInStream.getPos() + delta);
+    } else { // close the underlying stream as the new position is no longer in bounds
+      closeBlockInStream(mBlockInStream);
+    }
+    mPosition += delta;
+  }
+<<<<<<< Updated upstream
+
+
+
+
+  /**
+   * Initializes the underlying block stream if necessary. This method must be called before
+   * reading from mBlockInStream.
+   */
+  private void updateStream(long blockId) throws IOException {
+    if (mBlockInStream != null && mBlockInStream.remaining() > 0) { // can still read from stream
+      return;
+=======
+
+
+
+  /* Bounded Stream methods */
+  @Override
+  public long remaining() {
+    return mLength - mPosition;
+  }
+
+  /* Positioned Readable methods */
+  @Override
+  public int positionedRead(long pos, byte[] b, int off, int len) throws IOException {
+    return positionedReadInternal(pos, b, off, len);
+  }
+
+  private int positionedReadInternal(long pos, byte[] b, int off, int len) throws IOException {
+    if (pos < 0 || pos >= mLength) {
+      return -1;
+    }
+
+    int lenCopy = len;
+    CountingRetry retry = new CountingRetry(MAX_WORKERS_TO_RETRY);
+    IOException lastException = null;
+    while (len > 0 && retry.attempt()) {
+      if (pos >= mLength) {
+        break;
+      }
+      long blockId = mStatus.getBlockIds().get(Math.toIntExact(pos / mBlockSize));
+      BlockInStream stream = mBlockStore.getInStream(blockId, mOptions, mFailedWorkers);
+      try {
+        long offset = pos % mBlockSize;
+        int bytesRead =
+            stream.positionedRead(offset, b, off, (int) Math.min(mBlockSize - offset, len));
+        Preconditions.checkState(bytesRead > 0, "No data is read before EOF");
+        pos += bytesRead;
+        off += bytesRead;
+        len -= bytesRead;
+        retry.reset();
+        lastException = null;
+      } catch (UnavailableException | DeadlineExceededException | ConnectException e) {
+        lastException = e;
+        handleRetryableException(stream, e);
+        stream = null;
+      } finally {
+        closeBlockInStream(stream);
+      }
+>>>>>>> Stashed changes
     }
     if (lastException != null) {
       throw lastException;
@@ -544,6 +713,87 @@ public class FileInStream extends InputStream implements BoundedStream, Position
     Preconditions.checkArgument(pos <= mLength,
         PreconditionMessage.ERR_SEEK_PAST_END_OF_FILE.toString(), pos,mLength);
 
+<<<<<<< Updated upstream
+    if (mBlockInStream != null && mBlockInStream.remaining() == 0) { // current stream is done
+      closeBlockInStream(mBlockInStream);
+    }
+    // blockId = -1 if mPos = EOF.
+    if(blockId < 0){
+      return;
+    }
+
+    // Create stream
+    mBlockInStream = mBlockStore.getInStream(blockId, mOptions, mFailedWorkers);
+    // Set the stream to the correct position.
+    long offset = mPosition % mBlockSize;
+    mBlockInStream.seek(offset);
+  }
+  @Override
+  public void close() throws IOException {
+      updateStreams();
+      closeBlockInStream(mBlockInStream);
+      closeOrCancelCacheStream();
+  }
+  private void closeBlockInStream(BlockInStream stream) throws IOException {
+    if (stream != null) {
+      // Get relevant information from the stream.
+      WorkerNetAddress dataSource = stream.getAddress();
+      long blockId = stream.getId();
+      BlockInStream.BlockInStreamSource blockSource = stream.getSource();
+      stream.close();
+      // TODO(calvin): we should be able to do a close check instead of using null
+      if (stream == mBlockInStream) { // if stream is instance variable, set to null
+        mBlockInStream = null;
+      }
+      if (blockSource == BlockInStream.BlockInStreamSource.LOCAL) {
+        return;
+      }
+
+      // Send an async cache request to a worker based on read type and passive cache options.
+//      boolean cache = mOptions.getOptions().getReadType().isCache();
+//      boolean passiveCache = Configuration.getBoolean(PropertyKey.USER_FILE_PASSIVE_CACHE_ENABLED);
+//      long channelTimeout = Configuration.getMs(PropertyKey.USER_NETWORK_NETTY_TIMEOUT_MS);
+//      if (cache) {
+//        WorkerNetAddress worker;
+//        if (passiveCache && mContext.hasLocalWorker()) { // send request to local worker
+//          worker = mContext.getLocalWorker();
+//        } else { // send request to data source
+//          worker = dataSource;
+//        }
+//        try {
+//          // Construct the async cache request
+//          long blockLength = mOptions.getBlockInfo(blockId).getLength();
+//          Protocol.AsyncCacheRequest request =
+//              Protocol.AsyncCacheRequest.newBuilder().setBlockId(blockId).setLength(blockLength)
+//                  .setOpenUfsBlockOptions(mOptions.getOpenUfsBlockOptions(blockId))
+//                  .setSourceHost(dataSource.getHost()).setSourcePort(dataSource.getDataPort())
+//                  .build();
+//          Channel channel = mContext.acquireNettyChannel(worker);
+//          try {
+//            NettyRPCContext rpcContext =
+//                NettyRPCContext.defaults().setChannel(channel).setTimeout(channelTimeout);
+//            NettyRPC.fireAndForget(rpcContext, new ProtoMessage(request));
+//          } finally {
+//            mContext.releaseNettyChannel(worker, channel);
+//          }
+//        } catch (Exception e) {
+//          LOG.warn("Failed to complete async cache request for block {} at worker {}: {}", blockId,
+//              worker, e.getMessage());
+//        }
+//      }
+    }
+  }
+
+  private void handleRetryableException(BlockInStream stream, IOException e) {
+    WorkerNetAddress workerAddress = stream.getAddress();
+    LOG.warn("Failed to read block {} from worker {}, will retry: {}",
+        stream.getId(), workerAddress, e.getMessage());
+    try {
+      stream.close();
+    } catch (Exception ex) {
+      // Do not throw doing a best effort close
+      LOG.warn("Failed to close input stream for block {}: {}", stream.getId(), ex.getMessage());
+=======
     if (mBlockInStream == null) { // no current stream open, advance position
       mPosition = pos;
       return;
@@ -554,9 +804,242 @@ public class FileInStream extends InputStream implements BoundedStream, Position
       mBlockInStream.seek(mBlockInStream.getPos() + delta);
     } else { // close the underlying stream as the new position is no longer in bounds
       closeBlockInStream(mBlockInStream);
+>>>>>>> Stashed changes
     }
     mPosition += delta;
   }
+
+<<<<<<< Updated upstream
+    mFailedWorkers.put(workerAddress, System.currentTimeMillis());
+  }
+
+  @Override
+  public int readByte() throws IOException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public boolean readBool() throws IOException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public int readShort() throws IOException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public int readInt() throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public float readFloat() throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public long readLong() throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public double readDouble() throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public String readString() throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+///////////////
+=======
+
+
+
+  /**
+   * Initializes the underlying block stream if necessary. This method must be called before
+   * reading from mBlockInStream.
+   */
+  private void updateStream(long blockId) throws IOException {
+    if (mBlockInStream != null && mBlockInStream.remaining() > 0) { // can still read from stream
+      return;
+    }
+>>>>>>> Stashed changes
+
+    if (mBlockInStream != null && mBlockInStream.remaining() == 0) { // current stream is done
+      closeBlockInStream(mBlockInStream);
+    }
+    // blockId = -1 if mPos = EOF.
+    if(blockId < 0){
+      return;
+    }
+
+<<<<<<< Updated upstream
+  @Override
+  public int readByte(long pos) throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public boolean readBool(long pos) throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public int readShort(long pos) throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public int readInt(long pos) throws IOException {
+=======
+    // Create stream
+    mBlockInStream = mBlockStore.getInStream(blockId, mOptions, mFailedWorkers);
+    // Set the stream to the correct position.
+    long offset = mPosition % mBlockSize;
+    mBlockInStream.seek(offset);
+  }
+  @Override
+  public void close() throws IOException {
+      updateStreams();
+      closeBlockInStream(mBlockInStream);
+      closeOrCancelCacheStream();
+  }
+  private void closeBlockInStream(BlockInStream stream) throws IOException {
+    if (stream != null) {
+      // Get relevant information from the stream.
+      WorkerNetAddress dataSource = stream.getAddress();
+      long blockId = stream.getId();
+      BlockInStream.BlockInStreamSource blockSource = stream.getSource();
+      stream.close();
+      // TODO(calvin): we should be able to do a close check instead of using null
+      if (stream == mBlockInStream) { // if stream is instance variable, set to null
+        mBlockInStream = null;
+      }
+      if (blockSource == BlockInStream.BlockInStreamSource.LOCAL) {
+        return;
+      }
+
+      // Send an async cache request to a worker based on read type and passive cache options.
+//      boolean cache = mOptions.getOptions().getReadType().isCache();
+//      boolean passiveCache = Configuration.getBoolean(PropertyKey.USER_FILE_PASSIVE_CACHE_ENABLED);
+//      long channelTimeout = Configuration.getMs(PropertyKey.USER_NETWORK_NETTY_TIMEOUT_MS);
+//      if (cache) {
+//        WorkerNetAddress worker;
+//        if (passiveCache && mContext.hasLocalWorker()) { // send request to local worker
+//          worker = mContext.getLocalWorker();
+//        } else { // send request to data source
+//          worker = dataSource;
+//        }
+//        try {
+//          // Construct the async cache request
+//          long blockLength = mOptions.getBlockInfo(blockId).getLength();
+//          Protocol.AsyncCacheRequest request =
+//              Protocol.AsyncCacheRequest.newBuilder().setBlockId(blockId).setLength(blockLength)
+//                  .setOpenUfsBlockOptions(mOptions.getOpenUfsBlockOptions(blockId))
+//                  .setSourceHost(dataSource.getHost()).setSourcePort(dataSource.getDataPort())
+//                  .build();
+//          Channel channel = mContext.acquireNettyChannel(worker);
+//          try {
+//            NettyRPCContext rpcContext =
+//                NettyRPCContext.defaults().setChannel(channel).setTimeout(channelTimeout);
+//            NettyRPC.fireAndForget(rpcContext, new ProtoMessage(request));
+//          } finally {
+//            mContext.releaseNettyChannel(worker, channel);
+//          }
+//        } catch (Exception e) {
+//          LOG.warn("Failed to complete async cache request for block {} at worker {}: {}", blockId,
+//              worker, e.getMessage());
+//        }
+//      }
+    }
+  }
+
+  private void handleRetryableException(BlockInStream stream, IOException e) {
+    WorkerNetAddress workerAddress = stream.getAddress();
+    LOG.warn("Failed to read block {} from worker {}, will retry: {}",
+        stream.getId(), workerAddress, e.getMessage());
+    try {
+      stream.close();
+    } catch (Exception ex) {
+      // Do not throw doing a best effort close
+      LOG.warn("Failed to close input stream for block {}: {}", stream.getId(), ex.getMessage());
+    }
+
+    mFailedWorkers.put(workerAddress, System.currentTimeMillis());
+  }
+
+  @Override
+  public int readByte() throws IOException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public boolean readBool() throws IOException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public int readShort() throws IOException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public int readInt() throws IOException {
+>>>>>>> Stashed changes
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+<<<<<<< Updated upstream
+  public float readFloat(long pos) throws IOException {
+=======
+  public float readFloat() throws IOException {
+>>>>>>> Stashed changes
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+<<<<<<< Updated upstream
+  public long readLong(long pos) throws IOException {
+=======
+  public long readLong() throws IOException {
+>>>>>>> Stashed changes
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+<<<<<<< Updated upstream
+  public double readDouble(long pos) throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public String readString(long pos) throws IOException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void readBytes(byte[] bytes, long pos) throws IOException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public ByteBuffer[] getByteBuffers() {
+=======
 
 
 
@@ -702,59 +1185,113 @@ public class FileInStream extends InputStream implements BoundedStream, Position
 
 
   @Override
-  public int readByte(long pos) throws IOException {
+  public int readByte(int pos) throws IOException {
     throw new UnsupportedOperationException();
 
   }
 
   @Override
-  public boolean readBool(long pos) throws IOException {
+  public boolean readBool(int pos) throws IOException {
     throw new UnsupportedOperationException();
 
   }
 
   @Override
-  public int readShort(long pos) throws IOException {
+  public int readShort(int pos) throws IOException {
     throw new UnsupportedOperationException();
 
   }
 
   @Override
-  public int readInt(long pos) throws IOException {
+  public int readInt(int pos) throws IOException {
     throw new UnsupportedOperationException();
 
   }
 
   @Override
-  public float readFloat(long pos) throws IOException {
+  public float readFloat(int pos) throws IOException {
     throw new UnsupportedOperationException();
 
   }
 
   @Override
-  public long readLong(long pos) throws IOException {
+  public long readLong(int pos) throws IOException {
     throw new UnsupportedOperationException();
 
   }
 
   @Override
-  public double readDouble(long pos) throws IOException {
+  public double readDouble(int pos) throws IOException {
+    throw new UnsupportedOperationException();
+
+=======
+  public double readDouble() throws IOException {
     throw new UnsupportedOperationException();
 
   }
 
   @Override
-  public String readString(long pos) throws IOException {
+  public String readString() throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+///////////////
+
+
+  @Override
+  public int readByte(int pos) throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public boolean readBool(int pos) throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public int readShort(int pos) throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public int readInt(int pos) throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public float readFloat(int pos) throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public long readLong(int pos) throws IOException {
+    throw new UnsupportedOperationException();
+
+  }
+
+  @Override
+  public double readDouble(int pos) throws IOException {
+    throw new UnsupportedOperationException();
+
+>>>>>>> Stashed changes
+  }
+
+  @Override
+  public String readString(int pos) throws IOException {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public void readBytes(byte[] bytes, long pos) throws IOException {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public ByteBuffer[] getByteBuffers() {
+  public void readBytes(byte[] bytes, int pos) throws IOException {
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
     throw new UnsupportedOperationException();
   }
 

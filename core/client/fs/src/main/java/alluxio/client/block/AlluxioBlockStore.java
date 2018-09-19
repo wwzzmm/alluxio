@@ -11,10 +11,16 @@
 
 package alluxio.client.block;
 
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import alluxio.Configuration;
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
 import alluxio.Constants;
 import alluxio.PropertyKey;
 import alluxio.client.block.policy.BlockLocationPolicy;
@@ -41,13 +47,13 @@ import alluxio.wire.BlockInfo;
 import alluxio.wire.BlockLocation;
 import alluxio.wire.TieredIdentity;
 import alluxio.wire.WorkerNetAddress;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.ThreadSafe;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -55,7 +61,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.concurrent.ThreadSafe;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * Alluxio Block Store client. This is an internal client for all block level operations in Alluxio.

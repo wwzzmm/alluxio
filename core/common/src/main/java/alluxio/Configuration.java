@@ -15,17 +15,15 @@ import alluxio.conf.AlluxioProperties;
 import alluxio.conf.InstancedConfiguration;
 import alluxio.conf.Source;
 import alluxio.util.ConfigurationUtils;
-
 import com.google.common.base.Preconditions;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.net.URL;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
-import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * <p>

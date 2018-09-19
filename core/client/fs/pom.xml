@@ -58,7 +58,13 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-math3</artifactId>
       <version>3.4.1</version>
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
       <scope>test</scope>
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
     </dependency>
     <!-- Internal dependencies -->
     <dependency>

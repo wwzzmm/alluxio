@@ -54,7 +54,6 @@ import alluxio.wire.BlockLocation;
 import alluxio.wire.CommonOptions;
 import alluxio.wire.LoadMetadataType;
 import alluxio.wire.MountPointInfo;
-
 import com.google.common.base.Preconditions;
 import com.google.common.io.Closer;
 import org.apache.commons.io.FileUtils;
@@ -66,6 +65,7 @@ import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.ThreadSafe;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -76,8 +76,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
-import javax.annotation.concurrent.ThreadSafe;
 
 /**
  * Default implementation of the {@link FileSystem} interface. Developers can extend this class

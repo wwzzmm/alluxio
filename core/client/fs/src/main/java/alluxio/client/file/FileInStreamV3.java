@@ -78,52 +78,122 @@ public class FileInStreamV3 extends FileInStream {
 
 
   @Override
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
   public int readByte(long pos) throws IOException {
+=======
+  public int readByte(int pos) throws IOException {
+>>>>>>> Stashed changes
+=======
+  public int readByte(int pos) throws IOException {
+>>>>>>> Stashed changes
     throw new IndexOutOfBoundsException();
 
   }
 
   @Override
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
   public boolean readBool(long pos) throws IOException {
+=======
+  public boolean readBool(int pos) throws IOException {
+>>>>>>> Stashed changes
+=======
+  public boolean readBool(int pos) throws IOException {
+>>>>>>> Stashed changes
     throw new IndexOutOfBoundsException();
 
   }
 
   @Override
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
   public int readShort(long pos) throws IOException {
+=======
+  public int readShort(int pos) throws IOException {
+>>>>>>> Stashed changes
+=======
+  public int readShort(int pos) throws IOException {
+>>>>>>> Stashed changes
     throw new IndexOutOfBoundsException();
 
   }
 
   @Override
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
   public int readInt(long pos) throws IOException {
+=======
+  public int readInt(int pos) throws IOException {
+>>>>>>> Stashed changes
+=======
+  public int readInt(int pos) throws IOException {
+>>>>>>> Stashed changes
     throw new IndexOutOfBoundsException();
 
   }
 
   @Override
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
   public float readFloat(long pos) throws IOException {
+=======
+  public float readFloat(int pos) throws IOException {
+>>>>>>> Stashed changes
+=======
+  public float readFloat(int pos) throws IOException {
+>>>>>>> Stashed changes
     throw new IndexOutOfBoundsException();
 
   }
 
   @Override
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
   public long readLong(long pos) throws IOException {
+=======
+  public long readLong(int pos) throws IOException {
+>>>>>>> Stashed changes
+=======
+  public long readLong(int pos) throws IOException {
+>>>>>>> Stashed changes
     throw new IndexOutOfBoundsException();
 
   }
 
   @Override
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
   public double readDouble(long pos) throws IOException {
+=======
+  public double readDouble(int pos) throws IOException {
+>>>>>>> Stashed changes
+=======
+  public double readDouble(int pos) throws IOException {
+>>>>>>> Stashed changes
     throw new IndexOutOfBoundsException();
   }
 
   @Override
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
   public String readString(long pos) throws IOException {
     throw new IndexOutOfBoundsException();
   }
   @Override
   public void readBytes(byte[] bytes, long pos) throws IOException {
+=======
+=======
+>>>>>>> Stashed changes
+  public String readString(int pos) throws IOException {
+    throw new IndexOutOfBoundsException();
+  }
+  @Override
+  public void readBytes(byte[] bytes, int pos) throws IOException {
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
     if(bytes.length!=0){
       throw new IndexOutOfBoundsException();
     }

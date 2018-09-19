@@ -24,18 +24,16 @@ import alluxio.util.ShellUtils;
 import alluxio.util.UnixMountInfo;
 import alluxio.util.io.FileUtils;
 import alluxio.util.io.PathUtils;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * Represents a tier of storage, for example memory or SSD. It serves as a container of
@@ -46,12 +44,17 @@ import javax.annotation.concurrent.NotThreadSafe;
 public final class StorageTier {
   private static final Logger LOG = LoggerFactory.getLogger(StorageTier.class);
 
-  /** Alias value of this tier in tiered storage. */
+  /** Alias value of this tier in tiered storage.
+   * alluxio.worker.tieredstore.level0.alias
+   * */
   private final String mTierAlias;
   /** Ordinal value of this tier in tiered storage, highest level is 0. */
   private final int mTierOrdinal;
   /** Total capacity of all StorageDirs in bytes. */
   private long mCapacityBytes;
+  /**
+   * 每一层可以配置多个路径
+   */
   private List<StorageDir> mDirs;
 
   private StorageTier(String tierAlias) {

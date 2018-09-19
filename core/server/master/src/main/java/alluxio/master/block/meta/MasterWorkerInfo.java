@@ -18,13 +18,13 @@ import alluxio.client.block.options.GetWorkerReportOptions.WorkerInfoField;
 import alluxio.util.CommonUtils;
 import alluxio.wire.WorkerInfo;
 import alluxio.wire.WorkerNetAddress;
-
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,8 +36,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * Metadata for an Alluxio worker. This class is not thread safe, so external locking is required.
@@ -91,8 +89,8 @@ public final class MasterWorkerInfo {
     mStorageTierAssoc = null;
     mTotalBytesOnTiers = new HashMap<>();
     mUsedBytesOnTiers = new HashMap<>();
-    mBlocks = new HashSet<>();
-    mToRemoveBlocks = new HashSet<>();
+    mBlocks = ConcurrentHashMap.newKeySet();
+    mToRemoveBlocks = ConcurrentHashMap.newKeySet();
     mHeartbeatLock = new ReentrantLock();
   }
 

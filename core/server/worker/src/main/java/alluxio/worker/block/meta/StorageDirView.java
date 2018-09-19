@@ -13,15 +13,13 @@ package alluxio.worker.block.meta;
 
 import alluxio.worker.block.BlockMetadataManagerView;
 import alluxio.worker.block.BlockStoreLocation;
-
 import com.google.common.base.Preconditions;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * This class is a wrapper of {@link StorageDir} to provide more limited access and a filtered list
@@ -32,7 +30,7 @@ public final class StorageDirView {
 
   /** The {@link StorageDir} this view is derived from. */
   private final StorageDir mDir;
-  /** The {@link StorageTierView} this view under. */
+  /** The {@link StorageTierView} this view under . */
   private final StorageTierView mTierView;
   /** The {@link BlockMetadataManagerView} this view is associated with. */
   private final BlockMetadataManagerView mManagerView;

@@ -21,16 +21,14 @@ import alluxio.worker.block.allocator.Allocator;
 import alluxio.worker.block.meta.BlockMeta;
 import alluxio.worker.block.meta.StorageDirView;
 import alluxio.worker.block.meta.StorageTierView;
-
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * Provides the basic implementation for every evictor.
@@ -74,6 +72,7 @@ public abstract class AbstractEvictor extends AbstractBlockStoreEventListener im
    */
   protected StorageDirView cascadingEvict(long bytesToBeAvailable, BlockStoreLocation location,
       EvictionPlan plan, Mode mode) {
+//    存在换出算法会取最大的空间作为新空间
     location = updateBlockStoreLocation(bytesToBeAvailable, location);
 
     // 1. If bytesToBeAvailable can already be satisfied without eviction, return the eligible

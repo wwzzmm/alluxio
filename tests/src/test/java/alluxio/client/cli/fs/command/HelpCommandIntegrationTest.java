@@ -17,6 +17,7 @@ import alluxio.cli.fs.FileSystemShellUtils;
 import alluxio.cli.fs.command.HelpCommand;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -29,6 +30,7 @@ import java.util.TreeSet;
 /**
  * Integration tests for help command.
  */
+@Ignore
 public final class HelpCommandIntegrationTest extends AbstractFileSystemShellTest {
 
   /**

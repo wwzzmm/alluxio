@@ -16,7 +16,6 @@ import alluxio.network.ChannelType;
 import alluxio.util.OSUtils;
 import alluxio.util.io.PathUtils;
 import alluxio.wire.Scope;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -25,6 +24,8 @@ import com.google.common.collect.Sets;
 import com.sun.management.OperatingSystemMXBean;
 import com.sun.management.UnixOperatingSystemMXBean;
 
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.ThreadSafe;
 import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
@@ -36,9 +37,6 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.ThreadSafe;
 
 /**
  * Configuration property keys. This class provides a set of pre-defined property keys.
@@ -2362,7 +2360,15 @@ public final class PropertyKey implements Comparable<PropertyKey> {
                   .setDescription("it is for the blockInStream max map size ")
                   .build();
 
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
   public static final PropertyKey USER_FILE_IN_STREAM_CACHE_TIER =
+=======
+  public static final PropertyKey USER_FILE_IN_STREAM_CACHE_TIER=
+>>>>>>> Stashed changes
+=======
+  public static final PropertyKey USER_FILE_IN_STREAM_CACHE_TIER=
+>>>>>>> Stashed changes
           new Builder(Name.USER_FILE_IN_STREAM_CACHE_TIER)
                   .setDefaultValue(0)
                   .setDescription("it is for the cache tier ")
@@ -3593,8 +3599,16 @@ public final class PropertyKey implements Comparable<PropertyKey> {
     public static final String USER_FILE_MMAP_BYTES = "alluxio.user.file.mmap.bytes";
 
     public static final String USER_FILE_MAX_MMAP_BYTES = "alluxio.user.file.max.mmap.bytes";
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
     public static final String USER_FILE_IN_STREAM_CACHE_TIER =
             "alluxio.user.local.fileinstream.cache_tier";
+=======
+    public static final String USER_FILE_IN_STREAM_CACHE_TIER = "alluxio.user.local.fileinstream.cache_tier";
+>>>>>>> Stashed changes
+=======
+    public static final String USER_FILE_IN_STREAM_CACHE_TIER = "alluxio.user.local.fileinstream.cache_tier";
+>>>>>>> Stashed changes
 
     //
     // FUSE integration related properties

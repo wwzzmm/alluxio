@@ -948,6 +948,17 @@
           <!-- Needs to be 2.4.2 or later to prevent MSHADE-148 -->
           <version>2.4.3</version>
           <configuration>
+<<<<<<< Updated upstream
+=======
+            <artifactSet>
+              <excludes>
+                <exclude>io.netty:netty-all</exclude>
+                <exclude>org.apache.curator</exclude>
+                <exclude>org.apache.zookeeper</exclude>
+                <exclude>javax.servlet</exclude>
+              </excludes>
+            </artifactSet>
+>>>>>>> Stashed changes
           </configuration>
         </plugin>
         <plugin>

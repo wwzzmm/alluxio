@@ -18,12 +18,12 @@ import alluxio.exception.InvalidWorkerStateException;
 import alluxio.exception.WorkerOutOfSpaceException;
 import alluxio.util.io.FileUtils;
 import alluxio.worker.block.BlockStoreLocation;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,8 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
-
-import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * Represents a directory in a storage tier. It has a fixed capacity allocated to it on
@@ -53,6 +51,7 @@ public final class StorageDir {
   private Map<Long, Set<Long>> mSessionIdToTempBlockIdsMap;
   private AtomicLong mAvailableBytes;
   private AtomicLong mCommittedBytes;
+  /** 存储路径 /mnt/ramdisk/alluxioworker   */
   private String mDirPath;
   private int mDirIndex;
   private StorageTier mTier;
