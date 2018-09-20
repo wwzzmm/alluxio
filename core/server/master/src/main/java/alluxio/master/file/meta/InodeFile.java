@@ -23,6 +23,8 @@ import alluxio.proto.journal.Journal.JournalEntry;
 import alluxio.wire.FileInfo;
 
 import com.google.common.base.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +43,7 @@ public final class InodeFile extends Inode<InodeFile> {
   private boolean mCacheable;
   private boolean mCompleted;
   private long mLength;
+  private static final Logger LOG = LoggerFactory.getLogger(InodeFile.class);
 
   /**
    * Creates a new instance of {@link InodeFile}.
@@ -127,6 +130,8 @@ public final class InodeFile extends Inode<InodeFile> {
    */
   public long getNewBlockId() {
     long blockId = BlockId.createBlockId(mBlockContainerId, mBlocks.size());
+    LOG.info("createBlockId : containerId= {}, sequenceNumber= {}, blockId={}",
+            mBlockContainerId, mBlocks.size(), blockId);
     // TODO(gene): Check for max block sequence number, and sanity check the sequence number.
     // TODO(gene): Check isComplete?
     // TODO(gene): This will not work with existing lineage implementation, since a new writer will

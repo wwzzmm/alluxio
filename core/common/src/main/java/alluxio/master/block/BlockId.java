@@ -32,7 +32,6 @@ public final class BlockId {
   private static final int SEQUENCE_NUMBER_BITS = 64 - CONTAINER_ID_BITS;
   private static final long CONTAINER_ID_MASK = (1L << CONTAINER_ID_BITS) - 1;
   private static final long SEQUENCE_NUMBER_MASK = (1L << SEQUENCE_NUMBER_BITS) - 1;
-  private static final Logger LOG = LoggerFactory.getLogger(BlockId.class);
 
   private BlockId() {
     // prevent instantiation of a util class
@@ -47,8 +46,6 @@ public final class BlockId {
     // TODO(gene): Check for valid IDs here?
     long blockId = ((containerId & CONTAINER_ID_MASK) << SEQUENCE_NUMBER_BITS)
             | (sequenceNumber & SEQUENCE_NUMBER_MASK);
-    LOG.debug("createBlockId : containerId= {}, sequenceNumber= {}, blockId={}",
-            containerId, sequenceNumber, blockId);
     return blockId;
   }
 
