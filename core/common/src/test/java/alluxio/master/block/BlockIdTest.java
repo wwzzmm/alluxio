@@ -64,4 +64,31 @@ public final class BlockIdTest {
   public void getMaxSequenceNumber() {
     Assert.assertEquals(MAX_SEQUENCE_NUMBER, BlockId.getMaxSequenceNumber());
   }
+
+
+  @Test
+  public void getContainerId(){
+
+//    printId(16777216000l);
+//    printId(16793993215l);
+//    printId(3081118941183l);
+//    printId(3081102163968l);
+//    printId(3081219604479l);
+//    printId(3081202827264l);
+//    printId(21869772144644l);
+//    printId(2225480925184l);
+//    printId(2256418111488l);
+
+    printId(16777216000l);
+    printId(18706595840l);
+    printId(18689818624l);
+    printId(18673041408l);
+    printId(18656264192l);
+    printId(18723373056l);
+  }
+
+  private void printId(long blockId){
+    System.out.println(BlockId.getContainerId(blockId)+" "+BlockId.getSequenceNumber(blockId));
+  }
+
 }

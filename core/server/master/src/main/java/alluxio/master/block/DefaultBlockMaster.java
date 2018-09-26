@@ -531,6 +531,7 @@ public final class DefaultBlockMaster extends AbstractMaster implements BlockMas
         // prevent subsequent calls to return ids that have not been journaled and flushed.
         journalContext.append(getContainerIdJournalEntry());
       }
+      LOG.info("getNewContainerId {}",containerId);
       return containerId;
     }
   }

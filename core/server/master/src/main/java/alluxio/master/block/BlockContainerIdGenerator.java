@@ -11,9 +11,11 @@
 
 package alluxio.master.block;
 
-import java.util.concurrent.atomic.AtomicLong;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.ThreadSafe;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * This class generates unique block container ids.
@@ -22,6 +24,7 @@ import javax.annotation.concurrent.ThreadSafe;
 public final class BlockContainerIdGenerator implements ContainerIdGenerable {
 
   private final AtomicLong mNextContainerId;
+  private static final Logger LOG = LoggerFactory.getLogger(BlockContainerIdGenerator.class);
 
   /**
    * Creates a new instance of {@link BlockContainerIdGenerator}.
@@ -40,5 +43,6 @@ public final class BlockContainerIdGenerator implements ContainerIdGenerable {
    */
   public void setNextContainerId(long id) {
     mNextContainerId.set(id);
+    LOG.info("set nextContainerId {}" ,id);
   }
 }
