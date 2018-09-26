@@ -25,6 +25,7 @@ import alluxio.network.netty.NettyRPC;
 import alluxio.network.netty.NettyRPCContext;
 import alluxio.proto.dataserver.Protocol;
 import alluxio.util.io.BufferUtils;
+import alluxio.util.network.NettyUtils;
 import alluxio.util.proto.ProtoMessage;
 import alluxio.wire.BlockInfo;
 import alluxio.wire.WorkerNetAddress;
@@ -76,6 +77,7 @@ public class BlockInStreamV2MultiMap extends BlockInStream implements Input {
     private boolean mClosed = false;
     private ByteBuffer[] mBuffer;
     private Closer mCloser = Closer.create();
+    private Channel mChannel;
 
     /**
      * current read postion
@@ -195,7 +197,7 @@ public class BlockInStreamV2MultiMap extends BlockInStream implements Input {
     protected String getPath(WorkerNetAddress address, FileSystemContext context,
                              InStreamOptions options)
             throws IOException {
-        Channel mChannel = context.acquireNettyChannel(address);
+        mChannel = context.acquireNettyChannel(address);
         Protocol.LocalBlockOpenRequest request =
                 Protocol.LocalBlockOpenRequest.newBuilder().setBlockId(mBlockId)
                         .setPromote(options.getOptions().getReadType().isPromote()).build();
@@ -361,7 +363,17 @@ public class BlockInStreamV2MultiMap extends BlockInStream implements Input {
         for (ByteBuffer buffer : mBuffer) {
             BufferUtils.cleanDirectBuffer(buffer);
         }
-        mClosed = true;
+        try {
+            Protocol.LocalBlockCloseRequest closeRequest =
+                    Protocol.LocalBlockCloseRequest.newBuilder().setBlockId(mBlockId).build();
+            NettyRPC.call(NettyRPCContext.defaults().setChannel(mChannel).setTimeout(READ_TIMEOUT_MS), new ProtoMessage(closeRequest));
+        }catch (Exception e){
+            NettyUtils.enableAutoRead(mChannel);
+            throw e;
+        }finally {
+            mClosed = true;
+            mContext.releaseNettyChannel(mAddress, mChannel);
+        }
     }
 
     /**

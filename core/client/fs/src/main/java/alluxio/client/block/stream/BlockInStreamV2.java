@@ -62,6 +62,7 @@ public class BlockInStreamV2 extends BlockInStream implements Input {
   private boolean mClosed = false;
   private ByteBuffer mBuffer;
   private Closer mCloser = Closer.create();
+  private Channel mChannel;
 
   /**
    * Creates an instance of {@link BlockInStreamV2}.
@@ -166,7 +167,7 @@ public class BlockInStreamV2 extends BlockInStream implements Input {
   protected String getPath(WorkerNetAddress address, FileSystemContext context,
                            InStreamOptions options)
       throws IOException {
-    Channel mChannel = context.acquireNettyChannel(address);
+    mChannel = context.acquireNettyChannel(address);
     Protocol.LocalBlockOpenRequest request =
         Protocol.LocalBlockOpenRequest.newBuilder().setBlockId(mBlockId)
             .setPromote(options.getOptions().getReadType().isPromote()).build();
@@ -179,17 +180,6 @@ public class BlockInStreamV2 extends BlockInStream implements Input {
     } catch (Exception e) {
       context.releaseNettyChannel(address, mChannel);
       throw e;
-    }finally {
-      try {
-        Protocol.LocalBlockCloseRequest closeRequest =
-                Protocol.LocalBlockCloseRequest.newBuilder().setBlockId(mBlockId).build();
-        NettyRPC.call(NettyRPCContext.defaults().setChannel(mChannel).setTimeout(READ_TIMEOUT_MS), new ProtoMessage(closeRequest));
-      }catch (Exception e){
-        NettyUtils.enableAutoRead(mChannel);
-        throw e;
-      }finally {
-        context.releaseNettyChannel(address, mChannel);
-      }
     }
   }
 
@@ -284,7 +274,17 @@ public class BlockInStreamV2 extends BlockInStream implements Input {
   public void close() throws IOException {
     mCloser.close();
     BufferUtils.cleanDirectBuffer(mBuffer);
-    mClosed = true;
+    try {
+      Protocol.LocalBlockCloseRequest closeRequest =
+              Protocol.LocalBlockCloseRequest.newBuilder().setBlockId(mBlockId).build();
+      NettyRPC.call(NettyRPCContext.defaults().setChannel(mChannel).setTimeout(READ_TIMEOUT_MS), new ProtoMessage(closeRequest));
+    }catch (Exception e){
+      NettyUtils.enableAutoRead(mChannel);
+      throw e;
+    }finally {
+      mClosed = true;
+      mContext.releaseNettyChannel(mAddress, mChannel);
+    }
   }
 
   /**
