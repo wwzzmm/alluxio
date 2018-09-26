@@ -49,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -160,7 +161,8 @@ public final class AlluxioBlockStore {
    * Gets a stream to read the data of a block. This method is primarily responsible for
    * determining the data source and type of data source. The latest BlockInfo will be fetched
    * from the master to ensure the locations are up to date. It takes a map of failed workers and
-   * their most recently failed time and attempts to avoid reading from a recently failed worker.
+   * their most recently failed time and tries to update it when BlockInStream created failed,
+   * attempting to avoid reading from a recently failed worker.
    *
    * @param blockId the id of the block to read
    * @param options the options associated with the read request
@@ -172,7 +174,7 @@ public final class AlluxioBlockStore {
     // Get the latest block info from master
     BlockInfo info;
     try (CloseableResource<BlockMasterClient> masterClientResource =
-             mContext.acquireBlockMasterClientResource()) {
+                 mContext.acquireBlockMasterClientResource()) {
       info = masterClientResource.get().getBlockInfo(blockId);
     }
     List<BlockLocation> locations = info.getLocations();
@@ -194,20 +196,20 @@ public final class AlluxioBlockStore {
     BlockInStreamSource dataSourceType = null;
     WorkerNetAddress dataSource = null;
     locations = locations.stream()
-        .filter(location -> workers.contains(location.getWorkerAddress())).collect(toList());
+            .filter(location -> workers.contains(location.getWorkerAddress())).collect(toList());
     // First try to read data from Alluxio
     if (!locations.isEmpty()) {
       // TODO(calvin): Get location via a policy
       List<TieredIdentity> tieredLocations =
-          locations.stream().map(location -> location.getWorkerAddress().getTieredIdentity())
-              .collect(toList());
+              locations.stream().map(location -> location.getWorkerAddress().getTieredIdentity())
+                      .collect(toList());
       Collections.shuffle(tieredLocations);
       Optional<TieredIdentity> nearest = mTieredIdentity.nearest(tieredLocations);
       if (nearest.isPresent()) {
         dataSource = locations.stream().map(BlockLocation::getWorkerAddress)
-            .filter(addr -> addr.getTieredIdentity().equals(nearest.get())).findFirst().get();
+                .filter(addr -> addr.getTieredIdentity().equals(nearest.get())).findFirst().get();
         if (mTieredIdentity.getTier(0).getTierName().equals(Constants.LOCALITY_NODE)
-            && mTieredIdentity.topTiersMatch(nearest.get())) {
+                && mTieredIdentity.topTiersMatch(nearest.get())) {
           dataSourceType = BlockInStreamSource.LOCAL;
         } else {
           dataSourceType = BlockInStreamSource.REMOTE;
@@ -218,12 +220,12 @@ public final class AlluxioBlockStore {
     if (dataSource == null) {
       dataSourceType = BlockInStreamSource.UFS;
       BlockLocationPolicy policy =
-          Preconditions.checkNotNull(options.getOptions().getUfsReadLocationPolicy(),
-              PreconditionMessage.UFS_READ_LOCATION_POLICY_UNSPECIFIED);
+              Preconditions.checkNotNull(options.getOptions().getUfsReadLocationPolicy(),
+                      PreconditionMessage.UFS_READ_LOCATION_POLICY_UNSPECIFIED);
       blockWorkerInfo = blockWorkerInfo.stream()
-          .filter(workerInfo -> workers.contains(workerInfo.getNetAddress())).collect(toList());
+              .filter(workerInfo -> workers.contains(workerInfo.getNetAddress())).collect(toList());
       GetWorkerOptions getWorkerOptions = GetWorkerOptions.defaults().setBlockId(info.getBlockId())
-          .setBlockSize(info.getLength()).setBlockWorkerInfos(blockWorkerInfo);
+              .setBlockSize(info.getLength()).setBlockWorkerInfos(blockWorkerInfo);
       dataSource = policy.getWorker(getWorkerOptions);
     }
     if (dataSource == null) {
@@ -231,14 +233,21 @@ public final class AlluxioBlockStore {
     }
 //    return BlockInStream.create(mContext, info, dataSource, dataSourceType, options);
     if (options.getOptions().getVersion() == 2) {
-      if(options.getStatus().getLength() <= maxMapSize) {
+      if (options.getStatus().getLength() <= maxMapSize) {
         return BlockInStreamV2.create(mContext, info, dataSource, options);
-      }else{
+      } else {
         return BlockInStreamV2MultiMap.create(mContext, info, dataSource, options);
       }
     } else {
-      return BlockInStream.create(mContext, info, dataSource, dataSourceType, options);
 
+      try {
+        return BlockInStream.create(mContext, info, dataSource, dataSourceType, options);
+      } catch (ConnectException e) {
+        //When BlockInStream created failed, it will update the passed-in failedWorkers
+        //to attempt to avoid reading from this failed worker in next try.
+        failedWorkers.put(dataSource, System.currentTimeMillis());
+        throw e;
+      }
     }
   }
 

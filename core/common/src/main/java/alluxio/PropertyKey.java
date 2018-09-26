@@ -12,7 +12,6 @@
 package alluxio;
 
 import alluxio.exception.ExceptionMessage;
-import alluxio.network.ChannelType;
 import alluxio.util.OSUtils;
 import alluxio.util.io.PathUtils;
 import alluxio.wire.Scope;
@@ -285,6 +284,14 @@ public final class PropertyKey implements Comparable<PropertyKey> {
           .setIgnoredSiteProperty(true)
           .setConsistencyCheckLevel(ConsistencyCheckLevel.WARN)
           .build();
+  public static final PropertyKey CONF_VALIDATION_ENABLED =
+      new Builder(Name.CONF_VALIDATION_ENABLED)
+          .setDefaultValue(true)
+          .setDescription("Whether to validate the configuration properties when initializing "
+              + "Alluxio clients or server process.")
+          .setIsHidden(true)
+          .setConsistencyCheckLevel(ConsistencyCheckLevel.WARN)
+          .build();
   public static final PropertyKey DEBUG =
       new Builder(Name.DEBUG)
           .setDefaultValue(false)
@@ -430,6 +437,14 @@ public final class PropertyKey implements Comparable<PropertyKey> {
           .setDescription("Path to the web application resources.")
           .setConsistencyCheckLevel(ConsistencyCheckLevel.WARN)
           .setScope(Scope.SERVER)
+          .build();
+  public static final PropertyKey WEB_TEMP_PATH =
+      new Builder(Name.WEB_TEMP_PATH)
+          .setDefaultValue(String.format("${%s}/web/", Name.WORK_DIR))
+          .setDescription("Path to store temporary web server files.")
+          .setConsistencyCheckLevel(ConsistencyCheckLevel.IGNORE)
+          .setScope(Scope.SERVER)
+          .setIsHidden(true)
           .build();
   public static final PropertyKey WEB_THREADS =
       new Builder(Name.WEB_THREADS)
@@ -875,7 +890,46 @@ public final class PropertyKey implements Comparable<PropertyKey> {
       .setDescription("Service region when using Keystone authentication.")
       .setConsistencyCheckLevel(ConsistencyCheckLevel.ENFORCE)
       .build();
-
+  public static final PropertyKey COS_ACCESS_KEY =
+      new Builder(Name.COS_ACCESS_KEY)
+          .setDescription("The access key of COS bucket.")
+          .setConsistencyCheckLevel(ConsistencyCheckLevel.ENFORCE)
+          .setScope(Scope.SERVER)
+          .build();
+  public static final PropertyKey COS_APP_ID =
+      new Builder(Name.COS_APP_ID)
+          .setDescription("The app id of COS bucket.")
+          .setScope(Scope.SERVER)
+          .build();
+  public static final PropertyKey COS_CONNECTION_MAX =
+      new Builder(Name.COS_CONNECTION_MAX)
+          .setDefaultValue(1024)
+          .setDescription("The maximum number of COS connections.")
+          .build();
+  public static final PropertyKey COS_CONNECTION_TIMEOUT =
+      new Builder(Name.COS_CONNECTION_TIMEOUT)
+          .setDefaultValue("50sec")
+          .setDescription("The timeout of connecting to COS.")
+          .setScope(Scope.SERVER)
+          .build();
+  public static final PropertyKey COS_SOCKET_TIMEOUT =
+      new Builder(Name.COS_SOCKET_TIMEOUT)
+          .setDefaultValue("50sec")
+          .setDescription("The timeout of COS socket.")
+          .setScope(Scope.SERVER)
+          .build();
+  public static final PropertyKey COS_REGION =
+      new Builder(Name.COS_REGION)
+          .setDescription("The region name of COS bucket.")
+          .setConsistencyCheckLevel(ConsistencyCheckLevel.ENFORCE)
+          .setScope(Scope.SERVER)
+          .build();
+  public static final PropertyKey COS_SECRET_KEY =
+      new Builder(Name.COS_SECRET_KEY)
+          .setDescription("The secret key of COS bucket.")
+          .setConsistencyCheckLevel(ConsistencyCheckLevel.ENFORCE)
+          .setScope(Scope.SERVER)
+          .build();
   // Journal ufs related properties
   public static final PropertyKey MASTER_JOURNAL_UFS_OPTION =
       new Builder(Template.MASTER_JOURNAL_UFS_OPTION)
@@ -1430,8 +1484,9 @@ public final class PropertyKey implements Comparable<PropertyKey> {
   public static final PropertyKey WORKER_BLOCK_HEARTBEAT_TIMEOUT_MS =
       new Builder(Name.WORKER_BLOCK_HEARTBEAT_TIMEOUT_MS)
           .setAlias(new String[]{"alluxio.worker.block.heartbeat.timeout.ms"})
-          .setDefaultValue("5min")
-          .setDescription("The timeout value of block workers' heartbeats.")
+          .setDefaultValue(String.format("${%s}", Name.WORKER_MASTER_CONNECT_RETRY_TIMEOUT))
+          .setDescription("The timeout value of block workers' heartbeats. If the worker can't "
+              + "connect to master before this interval expires, the worker will exit.")
           .setConsistencyCheckLevel(ConsistencyCheckLevel.WARN)
           .setScope(Scope.WORKER)
           .build();
@@ -1670,17 +1725,15 @@ public final class PropertyKey implements Comparable<PropertyKey> {
       new Builder(Name.WORKER_MASTER_CONNECT_RETRY_TIMEOUT)
           .setDescription("Retry period before workers give up on connecting to master")
           .setDefaultValue("1hour")
-          // Leaving this hidden for now until we sort out how it should interact with
-          // WORKER_BLOCK_HEARTBEAT_TIMEOUT_MS.
-          .setIsHidden(true)
           .setScope(Scope.WORKER)
           .build();
   public static final PropertyKey WORKER_NETWORK_NETTY_CHANNEL =
       new Builder(Name.WORKER_NETWORK_NETTY_CHANNEL)
-          .setDescription("Netty channel type: NIO or EPOLL.")
+          .setDescription("Netty channel type: NIO or EPOLL. If EPOLL is not available, this will "
+              + "automatically fall back to NIO.")
           .setConsistencyCheckLevel(ConsistencyCheckLevel.WARN)
           .setScope(Scope.WORKER)
-          .setDefaultSupplier(ChannelType.DEFAULT_SUPPLIER)
+          .setDefaultValue("EPOLL")
           .build();
   public static final PropertyKey WORKER_NETWORK_NETTY_FILE_TRANSFER_TYPE =
       new Builder(Name.WORKER_NETWORK_NETTY_FILE_TRANSFER_TYPE)
@@ -2580,10 +2633,11 @@ public final class PropertyKey implements Comparable<PropertyKey> {
           .build();
   public static final PropertyKey USER_NETWORK_NETTY_CHANNEL =
       new Builder(Name.USER_NETWORK_NETTY_CHANNEL)
-          .setDescription("Type of netty channels.")
+          .setDescription("Type of netty channels. If EPOLL is not available, this will "
+              + "automatically fall back to NIO.")
           .setConsistencyCheckLevel(ConsistencyCheckLevel.WARN)
           .setScope(Scope.CLIENT)
-          .setDefaultSupplier(ChannelType.DEFAULT_SUPPLIER)
+          .setDefaultValue("EPOLL")
           .build();
   public static final PropertyKey USER_NETWORK_NETTY_TIMEOUT_MS =
       new Builder(Name.USER_NETWORK_NETTY_TIMEOUT_MS)
@@ -3088,6 +3142,7 @@ public final class PropertyKey implements Comparable<PropertyKey> {
   @ThreadSafe
   public static final class Name {
     public static final String CONF_DIR = "alluxio.conf.dir";
+    public static final String CONF_VALIDATION_ENABLED = "alluxio.conf.validation.enabled";
     public static final String DEBUG = "alluxio.debug";
     public static final String EXTENSIONS_DIR = "alluxio.extensions.dir";
     public static final String HOME = "alluxio.home";
@@ -3134,6 +3189,7 @@ public final class PropertyKey implements Comparable<PropertyKey> {
     public static final String TMP_DIRS = "alluxio.tmp.dirs";
     public static final String VERSION = "alluxio.version";
     public static final String WEB_RESOURCES = "alluxio.web.resources";
+    public static final String WEB_TEMP_PATH = "alluxio.web.temp.path";
     public static final String WEB_THREADS = "alluxio.web.threads";
     public static final String WORK_DIR = "alluxio.work.dir";
     public static final String ZOOKEEPER_ADDRESS = "alluxio.zookeeper.address";
@@ -3209,6 +3265,13 @@ public final class PropertyKey implements Comparable<PropertyKey> {
     //
     // UFS access control related properties
     //
+    public static final String COS_ACCESS_KEY = "fs.cos.access.key";
+    public static final String COS_APP_ID = "fs.cos.app.id";
+    public static final String COS_CONNECTION_MAX = "fs.cos.connection.max";
+    public static final String COS_CONNECTION_TIMEOUT = "fs.cos.connection.timeout";
+    public static final String COS_REGION = "fs.cos.region";
+    public static final String COS_SECRET_KEY = "fs.cos.secret.key";
+    public static final String COS_SOCKET_TIMEOUT = "fs.cos.socket.timeout";
     public static final String GCS_ACCESS_KEY = "fs.gcs.accessKeyId";
     public static final String GCS_SECRET_KEY = "fs.gcs.secretAccessKey";
     public static final String OSS_ACCESS_KEY = "fs.oss.accessKeyId";
@@ -3220,11 +3283,11 @@ public final class PropertyKey implements Comparable<PropertyKey> {
     public static final String SWIFT_AUTH_METHOD_KEY = "fs.swift.auth.method";
     public static final String SWIFT_AUTH_URL_KEY = "fs.swift.auth.url";
     public static final String SWIFT_PASSWORD_KEY = "fs.swift.password";
+    public static final String SWIFT_REGION_KEY = "fs.swift.region";
     public static final String SWIFT_SIMULATION = "fs.swift.simulation";
     public static final String SWIFT_TENANT_KEY = "fs.swift.tenant";
-    public static final String SWIFT_USER_KEY = "fs.swift.user";
     public static final String SWIFT_USE_PUBLIC_URI_KEY = "fs.swift.use.public.url";
-    public static final String SWIFT_REGION_KEY = "fs.swift.region";
+    public static final String SWIFT_USER_KEY = "fs.swift.user";
 
     //
     // Master related properties
@@ -3648,9 +3711,9 @@ public final class PropertyKey implements Comparable<PropertyKey> {
   public enum Template {
     LOCALITY_TIER("alluxio.locality.%s", "alluxio\\.locality\\.(\\w+)"),
     MASTER_IMPERSONATION_GROUPS_OPTION("alluxio.master.security.impersonation.%s.groups",
-        "alluxio.master.security.impersonation.(\\w+).groups"),
+        "alluxio\\.master\\.security\\.impersonation\\.([a-zA-Z_0-9-\\.@]+)\\.groups"),
     MASTER_IMPERSONATION_USERS_OPTION("alluxio.master.security.impersonation.%s.users",
-        "alluxio.master.security.impersonation.(\\w+).users"),
+        "alluxio\\.master\\.security\\.impersonation\\.([a-zA-Z_0-9-\\.@]+)\\.users"),
     MASTER_JOURNAL_UFS_OPTION("alluxio.master.journal.ufs.option",
         "alluxio\\.master\\.journal\\.ufs\\.option"),
     MASTER_JOURNAL_UFS_OPTION_PROPERTY("alluxio.master.journal.ufs.option.%s",
@@ -3712,12 +3775,16 @@ public final class PropertyKey implements Comparable<PropertyKey> {
 
       private static BiFunction<String, PropertyKey, PropertyKey> createNestedPropertyCreator(
           Scope scope, ConsistencyCheckLevel consistencyCheckLevel) {
-        return (name, baseProperty) -> new Builder(name)
-            .setDisplayType(baseProperty.getDisplayType())
-            .setDefaultSupplier(baseProperty.getDefaultSupplier())
-            .setScope(scope)
-            .setConsistencyCheckLevel(consistencyCheckLevel)
-            .buildUnregistered();
+        return (name, baseProperty) -> {
+          Builder builder = new Builder(name)
+              .setScope(scope)
+              .setConsistencyCheckLevel(consistencyCheckLevel);
+          if (baseProperty != null) {
+            builder.setDisplayType(baseProperty.getDisplayType());
+            builder.setDefaultSupplier(baseProperty.getDefaultSupplier());
+          }
+          return builder.buildUnregistered();
+        };
       }
     }
 

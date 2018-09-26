@@ -212,6 +212,16 @@ public abstract class AbstractLocalAlluxioCluster {
   }
 
   /**
+   * Stops the masters, formats them, and then restarts them. This is useful if a fresh state is
+   * desired, for example when restoring from a backup.
+   */
+  public void formatAndRestartMasters() throws Exception {
+    stopMasters();
+    Format.format(Format.Mode.MASTER);
+    startMasters();
+  }
+
+  /**
    * Stops the masters.
    */
   protected abstract void stopMasters() throws Exception;
@@ -309,6 +319,7 @@ public abstract class AbstractLocalAlluxioCluster {
    */
   protected void resetClientPools() throws IOException {
     Configuration.set(PropertyKey.USER_METRICS_COLLECTION_ENABLED, false);
+    FileSystemContext.clearCache();
     FileSystemContext.get().reset(Configuration.global());
   }
 

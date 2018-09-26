@@ -23,22 +23,20 @@ import alluxio.client.block.stream.BlockInStream;
 import alluxio.client.file.options.InStreamOptions;
 import alluxio.client.file.options.OutStreamOptions;
 import alluxio.client.file.policy.FileWriteLocationPolicy;
-import alluxio.exception.*;
+import alluxio.exception.BlockAlreadyExistsException;
+import alluxio.exception.BlockDoesNotExistException;
+import alluxio.exception.InvalidWorkerStateException;
+import alluxio.exception.PreconditionMessage;
 import alluxio.exception.status.DeadlineExceededException;
 import alluxio.exception.status.UnavailableException;
-import alluxio.network.netty.NettyRPC;
-import alluxio.network.netty.NettyRPCContext;
-import alluxio.proto.dataserver.Protocol;
 import alluxio.retry.CountingRetry;
 import alluxio.util.CommonUtils;
-import alluxio.util.proto.ProtoMessage;
 import alluxio.wire.WorkerNetAddress;
-
 import com.google.common.base.Preconditions;
-import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -46,8 +44,6 @@ import java.net.ConnectException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * A streaming API to read a file. This API represents a file as a stream of bytes and provides a
@@ -391,8 +387,8 @@ public class FileInStream extends InputStream implements BoundedStream, Position
     CountingRetry retry = new CountingRetry(MAX_WORKERS_TO_RETRY);
     IOException lastException = null;
     while (retry.attempt()) {
-      updateStreams();
       try {
+        updateStreams();
         int result = mBlockInStream.read();
         if (result != -1) {
           mPosition++;
@@ -407,8 +403,10 @@ public class FileInStream extends InputStream implements BoundedStream, Position
         return result;
       } catch (UnavailableException | DeadlineExceededException | ConnectException e) {
         lastException = e;
-        handleRetryableException(mBlockInStream, e);
-        mBlockInStream = null;
+        if (mBlockInStream != null) {
+          handleRetryableException(mBlockInStream, e);
+          mBlockInStream = null;
+        }
       }
     }
     throw lastException;
@@ -436,8 +434,8 @@ public class FileInStream extends InputStream implements BoundedStream, Position
     CountingRetry retry = new CountingRetry(MAX_WORKERS_TO_RETRY);
     IOException lastException = null;
     while (bytesLeft > 0 && mPosition != mLength && retry.attempt()) {
-      updateStreams();
       try {
+        updateStreams();
         int bytesRead = mBlockInStream.read(b, currentOffset, bytesLeft);
         if (bytesRead > 0) {
           if (mCurrentCacheStream != null) {
@@ -455,8 +453,10 @@ public class FileInStream extends InputStream implements BoundedStream, Position
         lastException = null;
       } catch (UnavailableException | ConnectException | DeadlineExceededException e) {
         lastException = e;
-        handleRetryableException(mBlockInStream, e);
-        mBlockInStream = null;
+        if (mBlockInStream != null) {
+          handleRetryableException(mBlockInStream, e);
+          mBlockInStream = null;
+        }
       }
     }
     if (lastException != null) {
@@ -504,8 +504,9 @@ public class FileInStream extends InputStream implements BoundedStream, Position
         break;
       }
       long blockId = mStatus.getBlockIds().get(Math.toIntExact(pos / mBlockSize));
-      BlockInStream stream = mBlockStore.getInStream(blockId, mOptions, mFailedWorkers);
+      BlockInStream stream = null;
       try {
+        stream = mBlockStore.getInStream(blockId, mOptions, mFailedWorkers);
         long offset = pos % mBlockSize;
         int bytesRead =
             stream.positionedRead(offset, b, off, (int) Math.min(mBlockSize - offset, len));
@@ -517,8 +518,10 @@ public class FileInStream extends InputStream implements BoundedStream, Position
         lastException = null;
       } catch (UnavailableException | DeadlineExceededException | ConnectException e) {
         lastException = e;
-        handleRetryableException(stream, e);
-        stream = null;
+        if (stream != null) {
+          handleRetryableException(stream, e);
+          stream = null;
+        }
       } finally {
         closeBlockInStream(stream);
       }

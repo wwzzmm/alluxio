@@ -36,6 +36,7 @@ import alluxio.master.file.options.CreateDirectoryOptions;
 import alluxio.master.file.options.CreateFileOptions;
 import alluxio.master.file.options.CreatePathOptions;
 import alluxio.master.file.options.DeleteOptions;
+import alluxio.master.journal.NoopJournalContext;
 import alluxio.master.metrics.MetricsMaster;
 import alluxio.master.metrics.MetricsMasterFactory;
 import alluxio.security.authorization.Mode;
@@ -112,7 +113,7 @@ public final class InodeTreeTest {
 
     mRegistry.start(true);
 
-    mTree.initializeRoot(TEST_OWNER, TEST_GROUP, TEST_DIR_MODE);
+    mTree.initializeRoot(TEST_OWNER, TEST_GROUP, TEST_DIR_MODE, NoopJournalContext.INSTANCE);
   }
 
   @After
@@ -142,7 +143,7 @@ public final class InodeTreeTest {
   public void initializeRootTwice() throws Exception {
     Inode<?> root = getInodeByPath(mTree, new AlluxioURI("/"));
     // initializeRoot call does nothing
-    mTree.initializeRoot(TEST_OWNER, TEST_GROUP, TEST_DIR_MODE);
+    mTree.initializeRoot(TEST_OWNER, TEST_GROUP, TEST_DIR_MODE, NoopJournalContext.INSTANCE);
     assertEquals(TEST_OWNER, root.getOwner());
     Inode<?> newRoot = getInodeByPath(mTree, new AlluxioURI("/"));
     assertEquals(root, newRoot);
@@ -396,7 +397,7 @@ public final class InodeTreeTest {
   @Test
   public void getInodeByNonexistingPath() throws Exception {
     mThrown.expect(FileDoesNotExistException.class);
-    mThrown.expectMessage("Path /test does not exist");
+    mThrown.expectMessage("Path \"/test\" does not exist");
 
     assertFalse(mTree.inodePathExists(TEST_URI));
     getInodeByPath(mTree, TEST_URI);
@@ -408,7 +409,7 @@ public final class InodeTreeTest {
   @Test
   public void getInodeByNonexistingNestedPath() throws Exception {
     mThrown.expect(FileDoesNotExistException.class);
-    mThrown.expectMessage("Path /nested/test/file does not exist");
+    mThrown.expectMessage("Path \"/nested/test/file\" does not exist");
 
     createPath(mTree, NESTED_URI, sNestedDirectoryOptions);
     assertFalse(mTree.inodePathExists(NESTED_FILE_URI));

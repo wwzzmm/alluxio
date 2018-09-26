@@ -30,6 +30,7 @@ import alluxio.master.file.options.CreateDirectoryOptions;
 import alluxio.master.file.options.CreateFileOptions;
 import alluxio.master.file.options.CreatePathOptions;
 import alluxio.master.file.options.DeleteOptions;
+import alluxio.master.journal.JournalContext;
 import alluxio.master.journal.JournalEntryIterable;
 import alluxio.proto.journal.File;
 import alluxio.proto.journal.File.InodeDirectoryEntry;
@@ -151,10 +152,12 @@ public class InodeTree implements JournalEntryIterable {
    * @param owner the root owner
    * @param group the root group
    * @param mode the root mode
+   * @param context the journal context to journal the initialization to
    */
-  public void initializeRoot(String owner, String group, Mode mode) throws UnavailableException {
+  public void initializeRoot(String owner, String group, Mode mode, JournalContext context)
+      throws UnavailableException {
     if (mRoot == null) {
-      InodeDirectory root = InodeDirectory.create(mDirectoryIdGenerator.getNewDirectoryId(),
+      InodeDirectory root = InodeDirectory.create(mDirectoryIdGenerator.getNewDirectoryId(context),
           NO_PARENT, ROOT_INODE_NAME,
           CreateDirectoryOptions.defaults().setOwner(owner).setGroup(group).setMode(mode));
       setRoot(root);
@@ -676,11 +679,24 @@ public class InodeTree implements JournalEntryIterable {
           // Lock the created inode before subsequent operations, and add it to the lock group.
           extensibleInodePath.getLockList().lockWriteAndCheckNameAndParent(lastInode,
               currentInodeDirectory, name);
+          InodeDirectory newDir = (InodeDirectory) lastInode;
           if (directoryOptions.isPersisted()) {
             // Do not journal the persist entry, since a creation entry will be journaled instead.
-            // TODO(david): remove this call to syncPersistDirectory to improve performance
-            // of recursive ls.
-            syncPersistDirectory(RpcContext.NOOP, (InodeDirectory) lastInode);
+            if (options.isMetadataLoad()) {
+              // if we are creating the file as a result of loading metadata, the newDir is already
+              // persisted, and we got the permissions info from the ufs.
+              newDir.setOwner(options.getOwner())
+                  .setGroup(options.getGroup())
+                  .setMode(options.getMode().toShort());
+
+              Long lastModificationTime = options.getOperationTimeMs();
+              if (lastModificationTime != null) {
+                newDir.setLastModificationTimeMs(lastModificationTime, true);
+              }
+              newDir.setPersistenceState(PersistenceState.PERSISTED);
+            } else {
+              syncPersistDirectory(RpcContext.NOOP, (InodeDirectory) lastInode);
+            }
           }
         } else if (options instanceof CreateFileOptions) {
           CreateFileOptions fileOptions = (CreateFileOptions) options;

@@ -33,9 +33,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -68,8 +65,6 @@ public final class MasterWorkerInfo {
   private Map<String, Long> mTotalBytesOnTiers;
   /** Mapping from storage tier alias to used bytes. */
   private Map<String, Long> mUsedBytesOnTiers;
-  /** A heartbeat lock to prevent concurrent heartbeats of the same worker info. */
-  private Lock mHeartbeatLock;
 
   /** ids of blocks the worker contains. */
   private Set<Long> mBlocks;
@@ -93,7 +88,6 @@ public final class MasterWorkerInfo {
     mUsedBytesOnTiers = new HashMap<>();
     mBlocks = new HashSet<>();
     mToRemoveBlocks = new HashSet<>();
-    mHeartbeatLock = new ReentrantLock();
   }
 
   /**
@@ -388,12 +382,5 @@ public final class MasterWorkerInfo {
   public void updateUsedBytes(String tierAlias, long usedBytesOnTier) {
     mUsedBytes += usedBytesOnTier - mUsedBytesOnTiers.get(tierAlias);
     mUsedBytesOnTiers.put(tierAlias, usedBytesOnTier);
-  }
-
-  /**
-   * @return the heartbeat lock
-   */
-  public Lock getHeartbeatLock() {
-    return mHeartbeatLock;
   }
 }

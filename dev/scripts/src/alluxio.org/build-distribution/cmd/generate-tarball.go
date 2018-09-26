@@ -128,6 +128,7 @@ func addAdditionalFiles(srcPath, dstPath string, hadoopVersion version, version 
 	pathsToCopy := []string{
 		"bin/alluxio",
 		"bin/alluxio-masters.sh",
+		"bin/alluxio-monitor.sh",
 		"bin/alluxio-mount.sh",
 		"bin/alluxio-start.sh",
 		"bin/alluxio-stop.sh",
@@ -162,6 +163,7 @@ func addAdditionalFiles(srcPath, dstPath string, hadoopVersion version, version 
 		"integration/mesos/bin/alluxio-mesos-stop.sh",
 		"integration/mesos/bin/alluxio-worker-mesos.sh",
 		"integration/mesos/bin/common.sh",
+		fmt.Sprintf("lib/alluxio-underfs-cos-%v.jar", version),
 		fmt.Sprintf("lib/alluxio-underfs-gcs-%v.jar", version),
 		fmt.Sprintf("lib/alluxio-underfs-hdfs-%v.jar", version),
 		fmt.Sprintf("lib/alluxio-underfs-local-%v.jar", version),
