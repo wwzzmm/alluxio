@@ -130,8 +130,8 @@ public final class InodeFile extends Inode<InodeFile> {
    */
   public long getNewBlockId() {
     long blockId = BlockId.createBlockId(mBlockContainerId, mBlocks.size());
-    LOG.info("createBlockId : containerId= {}, sequenceNumber= {}, blockId={}",
-            mBlockContainerId, mBlocks.size(), blockId);
+//    LOG.info("createBlockId : containerId= {}, sequenceNumber= {}, blockId={}",
+//            mBlockContainerId, mBlocks.size(), blockId);
     // TODO(gene): Check for max block sequence number, and sanity check the sequence number.
     // TODO(gene): Check isComplete?
     // TODO(gene): This will not work with existing lineage implementation, since a new writer will
