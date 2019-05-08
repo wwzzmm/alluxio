@@ -556,7 +556,9 @@ public class BaseFileSystem implements FileSystem {
     }
 
     private String bindHostname(String path) {
-        return AlluxioURI.SEPARATOR + NetworkAddressUtils.getLocalHostName() + path;
+        String uri = NetworkAddressUtils.getLocalHostName() + path;
+        String result = uri.replaceAll(AlluxioURI.SEPARATOR, "-");
+        return AlluxioURI.SEPARATOR + result;
     }
 
     public void processLocalization(AlluxioURI path, URIStatus status) throws Exception {
@@ -569,6 +571,7 @@ public class BaseFileSystem implements FileSystem {
                     }
                 } finally {
                     lock.release();
+                    deleteIfNotEmpty(client,path.getPath());
                 }
             } else {
                 LOG.info("file:{} failed to get lock", path.getPath());
@@ -576,6 +579,21 @@ public class BaseFileSystem implements FileSystem {
             }
         } else {
             forceLocal(status);
+        }
+    }
+
+    /**
+     *
+     * @param client
+     * @param path
+     */
+    private void deleteIfNotEmpty(CuratorFramework client, String path) {
+        try {
+            if (client.getChildren().forPath(path).isEmpty()) {
+                client.delete().forPath(path);
+            }
+        } catch (Exception e) {
+            LOG.warn("delete lock :{} failed {}", path,e);
         }
     }
 
