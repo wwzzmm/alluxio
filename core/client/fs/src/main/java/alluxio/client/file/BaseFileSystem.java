@@ -556,14 +556,15 @@ public class BaseFileSystem implements FileSystem {
     }
 
     private String bindHostname(String path) {
-        String uri = NetworkAddressUtils.getLocalHostName() + path;
+        String uri = path;
         String result = uri.replaceAll(AlluxioURI.SEPARATOR, "-");
-        return AlluxioURI.SEPARATOR + result;
+        return AlluxioURI.SEPARATOR + NetworkAddressUtils.getLocalHostName() + AlluxioURI.SEPARATOR + result;
     }
 
     public void processLocalization(AlluxioURI path, URIStatus status) throws Exception {
         if (zkEnable()) {
-            InterProcessMutex lock = new InterProcessMutex(client, bindHostname(path.getPath()));
+            String lockPath = bindHostname(path.getPath());
+            InterProcessMutex lock = new InterProcessMutex(client, lockPath);
             if (lock.acquire(60, TimeUnit.SECONDS)) {
                 try {
                     if (!isLocalWorker(fetchBlockInfo(status))) {
@@ -571,7 +572,7 @@ public class BaseFileSystem implements FileSystem {
                     }
                 } finally {
                     lock.release();
-                    deleteIfNotEmpty(client,path.getPath());
+                    deleteIfNotEmpty(client,lockPath);
                 }
             } else {
                 LOG.info("file:{} failed to get lock", path.getPath());

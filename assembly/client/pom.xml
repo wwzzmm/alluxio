@@ -78,7 +78,7 @@
               <goal>shade</goal>
             </goals>
             <configuration>
-              <finalName>${project.artifactId}-${project.version}-jar-with-dependencies</finalName>
+              <finalName>${project.artifactId}-${project.version}-jar-without-dependencies</finalName>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer" />
@@ -96,18 +96,38 @@
                 </filter>
               </filters>
               <artifactSet>
-                <excludes>
-                  <exclude>io.netty:netty-all</exclude>
-                  <exclude>org.apache.curator</exclude>
-                  <exclude>org.apache.zookeeper</exclude>
-                  <exclude>javax.servlet</exclude>
-                  <exclude>org.glassfish:javax.servlet</exclude>
-                </excludes>
+                <includes>
+                  <include>org.alluxio:alluxio-shell</include>
+                  <include>org.alluxio:alluxio-core-protobuf</include>
+                  <include>org.alluxio:alluxio-core-client-fs</include>
+                  <include>org.alluxio:alluxio-core-common</include>
+                  <include>org.alluxio:alluxio-examples</include>
+                  <include>org.alluxio:alluxio-keyvalue-client</include>
+                  <include>org.alluxio:alluxio-keyvalue-hadoop</include>
+                  <include>org.alluxio:alluxio-shell</include>
+                </includes>
+
+                <!--<excludes>-->
+                <!--<exclude>io.netty:netty-all</exclude>-->
+                <!--<exclude>org.apache.curator</exclude>-->
+                <!--<exclude>org.apache.zookeeper</exclude>-->
+                <!--<exclude>javax.servlet</exclude>-->
+                <!--<exclude>org.glassfish:javax.servlet</exclude>-->
+                <!--</excludes>-->
               </artifactSet>
+              <!--<minimizeJar>true</minimizeJar>-->
             </configuration>
           </execution>
         </executions>
       </plugin>
     </plugins>
+    <resources>
+      <resource>
+        <directory>src/main/java</directory>
+        <includes>
+          <include>**/*.txt</include>
+        </includes>
+      </resource>
+    </resources>
   </build>
 </project>
