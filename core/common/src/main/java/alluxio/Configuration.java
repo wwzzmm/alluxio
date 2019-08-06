@@ -68,7 +68,8 @@ public final class Configuration {
     // (likely to be in system properties) to locate the conf dir to search for the site property
     // file.
     PROPERTIES.clear();
-    PROPERTIES.merge(System.getProperties(), Source.SYSTEM_PROPERTY);
+    Properties copyProperties = (Properties) System.getProperties().clone();
+    PROPERTIES.merge(copyProperties, Source.SYSTEM_PROPERTY);
     if (Configuration.getBoolean(PropertyKey.TEST_MODE)) {
       validate();
       return;

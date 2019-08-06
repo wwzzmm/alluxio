@@ -556,9 +556,8 @@ public class BaseFileSystem implements FileSystem {
     }
 
     private String bindHostname(String path) {
-        String uri = path;
-        String result = uri.replaceAll(AlluxioURI.SEPARATOR, "-");
-        return AlluxioURI.SEPARATOR + NetworkAddressUtils.getLocalHostName() + AlluxioURI.SEPARATOR + result;
+        String lockName = path.replaceAll(AlluxioURI.SEPARATOR, "-");
+        return AlluxioURI.SEPARATOR + NetworkAddressUtils.getLocalHostName() + AlluxioURI.SEPARATOR +lockName;
     }
 
     public void processLocalization(AlluxioURI path, URIStatus status) throws Exception {
@@ -584,7 +583,6 @@ public class BaseFileSystem implements FileSystem {
     }
 
     /**
-     *
      * @param client
      * @param path
      */
